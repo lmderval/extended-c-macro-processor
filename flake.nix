@@ -18,11 +18,18 @@
       flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        xcmp = import ./xcmp { inherit pkgs; };
       in
       {
-        packages = { };
+        packages = {
+          xcmp = xcmp.package;
+          default = xcmp.package;
+        };
 
-        devShells = { };
+        devShells = {
+          xcmp = xcmp.devShell;
+          default = xcmp.devShell;
+        };
 
         formatter = pkgs.nixpkgs-fmt;
       })
