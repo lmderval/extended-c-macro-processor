@@ -1,6 +1,6 @@
-#include <iostream>
+#include <process/process.hh>
 
 int main() {
-    std::cout << "Hello, world!" << std::endl;
+    process::process(std::cin, std::cout);
     return 0;
 }
