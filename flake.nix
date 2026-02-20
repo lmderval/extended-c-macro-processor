@@ -31,6 +31,10 @@
           default = xcmp.devShell;
         };
 
+        images = {
+          xcmp = xcmp.image;
+        };
+
         formatter = pkgs.nixpkgs-fmt;
       })
     );

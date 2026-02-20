@@ -20,7 +20,7 @@ let
     '';
   };
 in
-{
+rec {
   package = xcmp;
 
   devShell = pkgs.mkShell {
@@ -31,5 +31,20 @@ in
     buildInputs = with pkgs; [
       clang-tools
     ];
+  };
+
+  image = pkgs.dockerTools.buildImage {
+    name = pname;
+    tag = version;
+    copyToRoot = pkgs.buildEnv {
+      name = "image-root";
+      pathsToLink = [ "/bin" ];
+      paths = with pkgs; [
+        bash
+        coreutils
+      ] ++ (
+        devShell.nativeBuildInputs ++ devShell.buildInputs
+      );
+    };
   };
 }
