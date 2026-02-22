@@ -13,6 +13,8 @@ let
       automake
       libtool
       pkg-config
+      flex
+      bison
     ];
 
     postPatch = ''
