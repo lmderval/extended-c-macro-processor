@@ -1,7 +1,9 @@
-#include <FlexLexer.h>
+#include <parse/lexer.hh>
 
 int main() {
-    yyFlexLexer lexer;
-    while (lexer.yylex() != 0) continue;
+    parse::Lexer lexer;
+    lexer.set_debug(1);
+    while (lexer.yylex(0).type_get() != parse::Parser::symbol_kind::S_YYEOF)
+        continue;
     return 0;
 }
