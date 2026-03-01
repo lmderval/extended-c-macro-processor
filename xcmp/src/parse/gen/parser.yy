@@ -16,6 +16,7 @@
 %define parse.trace
 
 %code requires{
+    #include <parse/driver.hh>
     #include <iostream>
     #include <sstream>
     #include <string>
@@ -29,7 +30,8 @@
 }
 
 %parse-param {parse::Lexer& lexer}
-%lex-param {int dummy}
+%parse-param {parse::Driver& driver}
+%lex-param {parse::Driver& driver}
 
 %code{
     #include <parse/lexer.hh>
@@ -55,22 +57,23 @@
 
 %token NEWLINE "newline"
 
-%nterm <std::vector<ast::Ast*>*>                input
-%nterm <ast::Ast*>                             text
+%nterm <std::vector<ast::Ast*>*>                document
+%nterm <ast::Ast*>                              text
 %nterm <std::vector<ast::Ast*>*>                arg
 %nterm <std::vector<ast::Ast*>*>                arg.1
 %nterm <std::vector<std::vector<ast::Ast*>*>*>  args
 
-%{
-    int dummy = 0;
-%}
-
 %start input
 
 %%
-input:
+input: document {
+                    auto vec = $1;
+                    for (auto it : *vec) driver.document_.emplace_back(it);
+                }
+
+document:
     %empty          { $$ = new std::vector<ast::Ast*>(); }
-  | input text      {
+  | document text   {
                         auto vec = $1;
                         vec->push_back($2);
                         $$ = vec;
@@ -87,7 +90,7 @@ text:
                                 for (auto arg_it : *vec) {
                                     ast::MacroCall::MacroArg arg;
                                     for (auto it : *arg_it) {
-                                        arg.emplace_back(&*it);
+                                        arg.emplace_back(it);
                                     }
                                     args.push_back(std::move(arg));
                                 }

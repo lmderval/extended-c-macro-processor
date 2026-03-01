@@ -16,17 +16,24 @@ NEWLINE (\n|\r|\r\n|\n\r)
 SPACE [ \t]
 
 %{
+    #include <parse/driver.hh>
     #include <parse/lexer.hh>
 
     #include "parser.hh"
 
+    namespace parse {
+        Lexer::Lexer(std::istream& is, std::ostream& os)
+            : yyFlexLexer(is, os) {}
+    } // namespace parse
+
     #undef YY_DECL
     #define YY_DECL                                                            \
         parse::Parser::symbol_type                                             \
-        parse::Lexer::yylex([[maybe_unused]] int dummy)
+        parse::Lexer::yylex(parse::Driver& driver)
 
     std::string str;
-    parse::location loc;
+
+    #define loc driver.get_loc()
 
     #define YY_USER_ACTION loc.columns (yyleng);
 %}

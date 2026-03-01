@@ -1,5 +1,7 @@
 #pragma once
 
+#include "driver.hh"
+
 #include "gen/parser.hh"
 
 #if !defined(yyFlexLexerOnce)
@@ -9,7 +11,10 @@
 namespace parse {
     class Lexer : public yyFlexLexer {
     public:
-        parse::Parser::symbol_type yylex(int dummy);
+        Lexer(std::istream& is = std::cin, std::ostream& os = std::cout);
+
+    public:
+        parse::Parser::symbol_type yylex(Driver& driver);
 
     private:
         int yylex() override { return 1; }

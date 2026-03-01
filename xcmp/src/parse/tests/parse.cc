@@ -1,9 +1,12 @@
-#include <parse/parser.hh>
-#include <parse/lexer.hh>
+#include <ast/pretty-printer.hh>
+#include <parse/driver.hh>
 
 int main() {
-    parse::Lexer lexer;
-    parse::Parser parser(lexer);
-    parser.set_debug_level(1);
-    parser.parse();
+    parse::Driver driver(true, true);
+    driver.parse(std::cin, "<stdin>");
+    const std::vector<ast::Ast::UPtr>& document = driver.get_document();
+    ast::PrettyPrinter printer(std::cout);
+    for (auto it = document.cbegin(); it != document.cend(); it++) {
+        (*it)->accept(printer);
+    }
 }

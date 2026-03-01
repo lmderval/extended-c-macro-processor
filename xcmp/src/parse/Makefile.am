@@ -19,7 +19,10 @@ libparse_la_SOURCES = \
 	lexer.cc \
 	parser.hh \
 	parser.cc \
-	location.hh
+	location.hh \
+	driver.hh \
+	driver.hxx \
+	driver.cc
 
 libparse_la_CPPFLAGS = -I$(top_srcdir)/src
 
