@@ -8,4 +8,10 @@ namespace ast {
         return args_;
     }
     inline bool MacroCall::get_spaced() const { return spaced_; }
+
+    inline void MacroCall::accept(ConstVisitor& visitor) const {
+        visitor(*this);
+    }
+
+    inline void MacroCall::accept(InvasiveVisitor& visitor) { visitor(*this); }
 } // namespace ast

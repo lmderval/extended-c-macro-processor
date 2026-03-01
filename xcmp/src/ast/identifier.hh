@@ -18,6 +18,9 @@ namespace ast {
     public:
         const std::string& get_id() const;
 
+        void accept(ConstVisitor& visitor) const override;
+        void accept(InvasiveVisitor& visitor) override;
+
     private:
         std::string id_;
     };

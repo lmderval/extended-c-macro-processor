@@ -17,7 +17,11 @@ libast_la_SOURCES = \
 	macro-def.cc \
 	macro-call.hh \
 	macro-call.hxx \
-	macro-call.cc
+	macro-call.cc \
+	visitor.hh \
+	visitor.hxx \
+	pretty-printer.hh \
+	pretty-printer.cc
 
 libast_la_CPPFLAGS = -I$(top_srcdir)/src
 

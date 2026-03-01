@@ -24,6 +24,9 @@ namespace ast {
         const MacroArgs& get_args() const;
         bool get_spaced() const;
 
+        void accept(ConstVisitor& visitor) const override;
+        void accept(InvasiveVisitor& visitor) override;
+
     private:
         std::string id_;
         MacroArgs args_;

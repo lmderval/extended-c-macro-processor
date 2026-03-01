@@ -21,6 +21,9 @@ namespace ast {
         const std::string& get_name() const;
         const MacroPars& get_pars() const;
 
+        void accept(ConstVisitor& visitor) const override;
+        void accept(InvasiveVisitor& visitor) override;
+
     private:
         std::string name_;
         MacroPars pars_;

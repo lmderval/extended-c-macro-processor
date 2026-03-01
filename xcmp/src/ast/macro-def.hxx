@@ -7,4 +7,10 @@ namespace ast {
     inline const MacroDef::MacroPars& MacroDef::get_pars() const {
         return pars_;
     }
+
+    inline void MacroDef::accept(ConstVisitor& visitor) const {
+        visitor(*this);
+    }
+
+    inline void MacroDef::accept(InvasiveVisitor& visitor) { visitor(*this); }
 } // namespace ast

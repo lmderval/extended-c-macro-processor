@@ -3,6 +3,8 @@
 #include <memory>
 #include <parse/location.hh>
 
+#include "visitor.hh"
+
 namespace ast {
     class Ast {
     public:
@@ -16,6 +18,9 @@ namespace ast {
 
     public:
         const parse::Location& get_loc() const;
+
+        virtual void accept(ConstVisitor& visitor) const = 0;
+        virtual void accept(InvasiveVisitor& visitor) = 0;
 
     private:
         parse::Location loc_;
