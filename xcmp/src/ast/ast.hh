@@ -8,17 +8,17 @@ namespace ast {
     public:
         using UPtr = std::unique_ptr<Ast>;
 
-        Ast(const parse::location& loc);
+        Ast(const parse::Location& loc);
         Ast(const Ast&) = delete;
         Ast& operator=(const Ast&) = delete;
 
         virtual ~Ast() = 0;
 
     public:
-        const parse::location& get_loc() const;
+        const parse::Location& get_loc() const;
 
     private:
-        parse::location loc_;
+        parse::Location loc_;
     };
 } // namespace ast
 

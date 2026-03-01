@@ -1,5 +1,9 @@
 %option noyywrap
 
+%option c++
+
+%option outfile="lex.yy.c"
+
 %top{
     #include <algorithm>
     #include <cctype>
@@ -12,7 +16,8 @@ NEWLINE (\n|\r|\r\n|\n\r)
 SPACE [ \t]
 
 %{
-    #include "lexer.hh"
+    #include <parse/lexer.hh>
+
     #include "parser.hh"
 
     #undef YY_DECL

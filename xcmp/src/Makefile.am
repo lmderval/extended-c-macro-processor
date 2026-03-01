@@ -1,4 +1,5 @@
 SUBDIRS = \
+	parse/gen \
 	ast \
 	parse \
 	process

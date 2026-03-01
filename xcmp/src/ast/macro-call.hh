@@ -12,7 +12,7 @@ namespace ast {
         using MacroArg = std::vector<Ast::UPtr>;
         using MacroArgs = std::vector<MacroArg>;
 
-        MacroCall(const parse::location& loc, const std::string& id,
+        MacroCall(const parse::Location& loc, const std::string& id,
                   MacroArgs args, bool spaced = false);
         MacroCall(const MacroCall&) = delete;
         MacroCall& operator=(const MacroCall&) = delete;

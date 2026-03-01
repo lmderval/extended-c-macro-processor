@@ -9,7 +9,7 @@ namespace ast {
     public:
         using UPtr = std::unique_ptr<Identifier>;
 
-        Identifier(const parse::location& loc, const std::string& id);
+        Identifier(const parse::Location& loc, const std::string& id);
         Identifier(const Identifier&) = delete;
         Identifier& operator=(const Identifier&) = delete;
 
