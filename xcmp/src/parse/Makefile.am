@@ -27,6 +27,9 @@ CLEANFILES = \
 	parser.cc \
 	location.hh
 
+libparse_la_LIBADD = \
+	$(top_srcdir)/src/ast/libast.la
+
 lexer.cc: lexer.ll
 	$(AM_V_LEX)$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).cc $@ -- $(LEXCOMPILE)
 

@@ -21,6 +21,7 @@ AC_PROG_YACC
 AC_CONFIG_FILES([
     Makefile
     src/Makefile
+    src/ast/Makefile
     src/parse/Makefile
     src/parse/tests/Makefile
     src/process/Makefile
