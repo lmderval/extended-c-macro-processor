@@ -24,6 +24,7 @@ libast_la_SOURCES = \
 	visitor.hh \
 	visitor.hxx \
 	pretty-printer.hh \
+	pretty-printer.hxx \
 	pretty-printer.cc
 
 libast_la_CPPFLAGS = -I$(top_srcdir)/src

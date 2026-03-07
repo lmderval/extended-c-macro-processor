@@ -17,6 +17,23 @@ namespace ast {
         void operator()(const Text& e) override;
 
     private:
-        std::ostream& os_;
+        struct pstream {
+            std::ostream& os;
+            int indent_level = 0;
+
+            template <typename T>
+            pstream& operator<<(const T& t);
+            pstream& operator<<(std::ostream& (*fx)(std::ostream&));
+            pstream& operator<<(pstream& (*fx)(pstream&));
+        };
+
+        static pstream& incindent(pstream& os);
+        static pstream& indent(pstream& os);
+        static pstream& decindent(pstream& os);
+
+    private:
+        pstream ps_;
     };
 } // namespace ast
+
+#include "pretty-printer.hxx"
