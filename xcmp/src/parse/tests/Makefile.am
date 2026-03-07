@@ -8,7 +8,7 @@ parse_SOURCES = parse.cc
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
-AM_CXXFLAGS = -std=c++20 -Werror -Wall -Wextra -Wold-style-cast
+AM_CXXFLAGS = -std=c++23 -Werror -Wall -Wextra -Wold-style-cast
 
 LDADD = \
 	$(top_srcdir)/src/parse/libparse.la

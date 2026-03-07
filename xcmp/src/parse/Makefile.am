@@ -26,7 +26,7 @@ libparse_la_SOURCES = \
 
 libparse_la_CPPFLAGS = -I$(top_srcdir)/src
 
-libparse_la_CXXFLAGS = -std=c++20 -Werror -Wall -Wextra
+libparse_la_CXXFLAGS = -std=c++23 -Werror -Wall -Wextra
 
 libparse_la_LIBADD = \
 	$(top_srcdir)/src/ast/libast.la
