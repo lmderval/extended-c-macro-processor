@@ -2,6 +2,7 @@
 
 namespace ast {
     class Ast;
+    class Document;
     class Identifier;
     class MacroCall;
     class MacroDef;

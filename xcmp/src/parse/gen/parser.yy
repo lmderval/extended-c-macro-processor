@@ -57,23 +57,33 @@
 
 %token NEWLINE "newline"
 
-%nterm <std::vector<ast::Ast*>*>                document
-%nterm <ast::Ast*>                              text
-%nterm <std::vector<ast::Ast*>*>                arg
-%nterm <std::vector<ast::Ast*>*>                arg.1
+%nterm <ast::Document*>                         document
+%nterm <std::vector<ast::Ast*>*>                document.1
+%nterm <ast::Ast*>                              directive
+%nterm <ast::Ast*>                              text text.1
+%nterm <std::vector<ast::Ast*>*>                arg  arg.1
 %nterm <std::vector<std::vector<ast::Ast*>*>*>  args
+
+%expect 0
+
+%precedence ID
+%precedence LPAREN
 
 %start input
 
 %%
-input: document {
-                    auto vec = $1;
-                    for (auto it : *vec) driver.document_.emplace_back(it);
-                }
+input: document { driver.document_ = ast::Document::UPtr($1); }
 
-document:
-    %empty          { $$ = new std::vector<ast::Ast*>(); }
-  | document text   {
+document: document.1    {
+                            auto vec = $1;
+                            std::vector<ast::Ast::UPtr> body;
+                            for (auto it : *vec) body.emplace_back(it);
+                            $$ = new ast::Document(@$, std::move(body));
+                        }
+
+document.1:
+    %empty          { $$ = new std::vector<ast::Ast*>();  }
+  | document.1 text {
                         auto vec = $1;
                         vec->push_back($2);
                         $$ = vec;
@@ -81,9 +91,31 @@ document:
   ;
 
 text:
+    COMMA       { $$ = new ast::Text(@$, ","); }
+  | directive   { $$ = $1; }
+  | text.1      { $$ = $1; }
+  ;
+
+text.1:
     TEXT                    { $$ = new ast::Text(@$, $1); }
   | ID                      { $$ = new ast::Identifier(@$, $1); }
   | NEWLINE                 { $$ = new ast::Text(@$, "\n"); }
+  | "(" document.1 ")"      {
+                                auto vec = $2;
+                                std::vector<ast::Ast::UPtr> body;
+                                body.emplace_back(new ast::Text(@1, "("));
+                                for (auto it : *vec) body.emplace_back(it);
+                                body.emplace_back(new ast::Text(@3, ")"));
+                                $$ = new ast::Document(@$, std::move(body));
+                            }
+  | "{" document.1 "}"      {
+                                auto vec = $2;
+                                std::vector<ast::Ast::UPtr> body;
+                                body.emplace_back(new ast::Text(@1, "{"));
+                                for (auto it : *vec) body.emplace_back(it);
+                                body.emplace_back(new ast::Text(@3, "}"));
+                                $$ = new ast::Document(@$, std::move(body));
+                            }
   | ID "(" args ")"         {
                                 auto vec = $3;
                                 ast::MacroCall::MacroArgs args;
@@ -104,16 +136,16 @@ arg:
   ;
 
 arg.1:
-    text        {
-                    auto vec = new std::vector<ast::Ast*>();
-                    vec->push_back($1);
-                    $$ = vec;
-                }
-  | arg.1 text  {
-                    auto vec = $1;
-                    vec->push_back($2);
-                    $$ = vec;
-                }
+    text.1          {
+                        auto vec = new std::vector<ast::Ast*>();
+                        vec->push_back($1);
+                        $$ = vec;
+                    }
+  | arg.1 text.1    {
+                        auto vec = $1;
+                        vec->push_back($2);
+                        $$ = vec;
+                    }
   ;
 
 args:
@@ -128,6 +160,13 @@ args:
                         $$ = vec;
                     }
   ;
+
+directive:
+    "%define" ID NEWLINE document "%end" NEWLINE {
+        std::vector<ast::Ast::UPtr> body;
+        $$ = new ast::MacroDef(@$, $2, ast::MacroDef::MacroPars(),
+                               ast::Document::UPtr($4));
+    }
 %%
 
 namespace parse {

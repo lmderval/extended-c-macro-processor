@@ -4,7 +4,7 @@
 
 namespace parse {
     inline Location& Driver::get_loc() { return loc_; }
-    inline const std::vector<ast::Ast::UPtr>& Driver::get_document() const {
-        return document_;
+    inline const ast::Document* Driver::get_document() const {
+        return document_.get();
     }
 } // namespace parse

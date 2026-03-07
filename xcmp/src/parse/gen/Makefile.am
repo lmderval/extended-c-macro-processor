@@ -4,7 +4,7 @@ BUILT_SOURCES = \
 	parser.cc \
 	location.hh
 
-AM_YFLAGS = -Wno-yacc
+AM_YFLAGS = -Wno-yacc -Wcounterexamples
 
 CLEANFILES = \
 	lexer.cc \

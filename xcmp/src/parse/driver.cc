@@ -10,7 +10,7 @@ namespace parse {
         : scan_trace_(scan_trace)
         , parse_trace_(parse_trace)
         , loc_()
-        , document_() {}
+        , document_(nullptr) {}
 
     int Driver::parse(std::istream& is, const std::string& filename) {
         loc_.initialize(&filename);

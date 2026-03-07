@@ -21,6 +21,7 @@ namespace ast {
 
     public:
         virtual void operator()(const_t<Ast>& e);
+        virtual void operator()(const_t<Document>& e) = 0;
         virtual void operator()(const_t<Identifier>& e) = 0;
         virtual void operator()(const_t<MacroCall>& e) = 0;
         virtual void operator()(const_t<MacroDef>& e) = 0;

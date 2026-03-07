@@ -10,10 +10,11 @@ namespace ast {
         PrettyPrinter(std::ostream& os);
 
     public:
-        void operator()(const Identifier& e);
-        void operator()(const MacroCall& e);
-        void operator()(const MacroDef& e);
-        void operator()(const Text& e);
+        void operator()(const Document& e) override;
+        void operator()(const Identifier& e) override;
+        void operator()(const MacroCall& e) override;
+        void operator()(const MacroDef& e) override;
+        void operator()(const Text& e) override;
 
     private:
         std::ostream& os_;

@@ -12,6 +12,9 @@ libast_la_SOURCES = \
 	identifier.hh \
 	identifier.hxx \
 	identifier.cc \
+	document.hh \
+	document.hxx \
+	document.cc \
 	macro-def.hh \
 	macro-def.hxx \
 	macro-def.cc \

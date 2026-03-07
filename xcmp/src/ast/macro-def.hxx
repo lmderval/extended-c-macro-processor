@@ -7,6 +7,9 @@ namespace ast {
     inline const MacroDef::MacroPars& MacroDef::get_pars() const {
         return pars_;
     }
+    inline const Ast& MacroDef::get_body() const {
+        return *body_;
+    }
 
     inline void MacroDef::accept(ConstVisitor& visitor) const {
         visitor(*this);

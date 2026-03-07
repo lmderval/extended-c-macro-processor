@@ -6,6 +6,10 @@ namespace ast {
     PrettyPrinter::PrettyPrinter(std::ostream& os)
         : os_(os) {}
 
+    void PrettyPrinter::operator()(const Document& e) {
+        for (const Ast::UPtr& child : e.get_body()) child->accept(*this);
+    }
+
     void PrettyPrinter::operator()(const Identifier& e) { os_ << e.get_id(); }
 
     void PrettyPrinter::operator()(const MacroCall& e) {

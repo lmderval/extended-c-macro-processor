@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ast/ast.hh>
-#include <vector>
+#include <ast/document.hh>
 
 #include "location.hh"
 
@@ -14,7 +13,7 @@ namespace parse {
 
     public:
         Location& get_loc();
-        const std::vector<ast::Ast::UPtr>& get_document() const;
+        const ast::Document* get_document() const;
 
         int parse(std::istream& is, const std::string& filename);
         int parse(const std::string& filename);
@@ -23,7 +22,7 @@ namespace parse {
         bool scan_trace_;
         bool parse_trace_;
         Location loc_;
-        std::vector<ast::Ast::UPtr> document_;
+        ast::Document::UPtr document_;
     };
 } // namespace parse
 

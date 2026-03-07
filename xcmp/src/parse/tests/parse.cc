@@ -3,10 +3,11 @@
 
 int main() {
     parse::Driver driver(true, true);
-    driver.parse(std::cin, "<stdin>");
-    const std::vector<ast::Ast::UPtr>& document = driver.get_document();
-    ast::PrettyPrinter printer(std::cout);
-    for (auto it = document.cbegin(); it != document.cend(); it++) {
-        (*it)->accept(printer);
+    if (driver.parse(std::cin, "<stdin>")) {
+        std::cerr << "Unable to parse file" << std::endl;
+        return 1;
     }
+    const ast::Document& document = *driver.get_document();
+    ast::PrettyPrinter printer(std::cout);
+    document.accept(printer);
 }
