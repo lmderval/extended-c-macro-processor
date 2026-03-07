@@ -81,6 +81,7 @@ document: document.1    {
                             std::vector<ast::Ast::UPtr> body;
                             for (auto it : *vec) body.emplace_back(it);
                             $$ = new ast::Document(@$, std::move(body));
+                            delete vec;
                         }
 
 document.1:
@@ -110,6 +111,7 @@ text.1:
                                 for (auto it : *vec) body.emplace_back(it);
                                 body.emplace_back(new ast::Text(@3, ")"));
                                 $$ = new ast::Document(@$, std::move(body));
+                                delete vec;
                             }
   | "{" document.1 "}"      {
                                 auto vec = $2;
@@ -118,6 +120,7 @@ text.1:
                                 for (auto it : *vec) body.emplace_back(it);
                                 body.emplace_back(new ast::Text(@3, "}"));
                                 $$ = new ast::Document(@$, std::move(body));
+                                delete vec;
                             }
   | ID "(" args ")"         {
                                 auto vec = $3;
@@ -128,8 +131,10 @@ text.1:
                                         arg.emplace_back(it);
                                     }
                                     args.push_back(std::move(arg));
+                                    delete arg_it;
                                 }
                                 $$ = new ast::MacroCall(@$, $1, std::move(args));
+                                delete vec;
                             }
   ;
 
@@ -172,6 +177,7 @@ directive:
   | "%define" ID "(" pars ")" NEWLINE document "%end" NEWLINE {
         auto pars = $4;
         $$ = new ast::MacroDef(@$, $2, *pars, ast::Document::UPtr($7));
+        delete pars;
     }
   ;
 
