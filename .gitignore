@@ -1,0 +1,31 @@
+# autoreconf
+Makefile.in
+aclocal.m4
+ar-lib
+autom4te.cache/
+compile
+config.guess
+config.sub
+configure
+depcomp
+install-sh
+ltmain.sh
+missing
+ylwrap
+
+# configure
+Makefile
+.deps/
+config.log
+config.status
+libtool
+
+# make
+.libs/
+*.a
+*.o
+*.la
+*.lo
+
+# misc
+compile_commands.json
