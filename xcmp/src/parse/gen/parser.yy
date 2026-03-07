@@ -23,6 +23,7 @@
     #include <vector>
 
     #include <ast/fwd.hh>
+    #include <ast/macro-def.hh>
 
     namespace parse {
         class Lexer;
@@ -63,6 +64,7 @@
 %nterm <ast::Ast*>                              text text.1
 %nterm <std::vector<ast::Ast*>*>                arg  arg.1
 %nterm <std::vector<std::vector<ast::Ast*>*>*>  args
+%nterm <ast::MacroDef::MacroPars*>              pars
 
 %expect 0
 
@@ -99,6 +101,7 @@ text:
 text.1:
     TEXT                    { $$ = new ast::Text(@$, $1); }
   | ID                      { $$ = new ast::Identifier(@$, $1); }
+  | STRING                  { $$ = new ast::Text(@$, $1); }
   | NEWLINE                 { $$ = new ast::Text(@$, "\n"); }
   | "(" document.1 ")"      {
                                 auto vec = $2;
@@ -163,15 +166,31 @@ args:
 
 directive:
     "%define" ID NEWLINE document "%end" NEWLINE {
-        std::vector<ast::Ast::UPtr> body;
         $$ = new ast::MacroDef(@$, $2, ast::MacroDef::MacroPars(),
                                ast::Document::UPtr($4));
     }
+  | "%define" ID "(" pars ")" NEWLINE document "%end" NEWLINE {
+        auto pars = $4;
+        $$ = new ast::MacroDef(@$, $2, *pars, ast::Document::UPtr($7));
+    }
+  ;
+
+pars:
+    ID          {
+                    auto pars = new ast::MacroDef::MacroPars();
+                    pars->push_back($1);
+                    $$ = pars;
+                }
+  | pars "," ID {
+                    auto pars = $1;
+                    pars->push_back($3);
+                    $$ = pars;
+                }
+  ;
 %%
 
 namespace parse {
-    void Parser::error (const location_type& l, const std::string& m)
-    {
+    void Parser::error (const location_type& l, const std::string& m) {
         std::cerr << l << ": " << m << '\n';
     }
 } // namespace parse

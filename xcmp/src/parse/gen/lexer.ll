@@ -52,15 +52,11 @@ SPACE [ \t]
                     }
 ^{SPACE}*"%end"     { return parse::Parser::make_END_DIRECTIVE(loc); }
 
-<*>{
+<DIRECTIVE>{
     "("             { return parse::Parser::make_LPAREN(loc); }
     ")"             { return parse::Parser::make_RPAREN(loc); }
-    "{"             { return parse::Parser::make_LBRACE(loc); }
-    "}"             { return parse::Parser::make_RBRACE(loc); }
     ","             { return parse::Parser::make_COMMA(loc); }
-}
 
-<DIRECTIVE>{
     {IDENTIFIER}    { return parse::Parser::make_ID(yytext, loc); }
     {NEWLINE}       {
                         loc.lines();
@@ -82,32 +78,45 @@ SPACE [ \t]
 
 "\""    {
             str.clear();
+            str.append("\"");
             BEGIN(STRING);
         }
 
 <STRING>{
-    "\\\""      { str.append("\""); }
-    "\""        {
-                    BEGIN(INITIAL);
-                    return parse::Parser::make_STRING(str, loc);
-                }
-    {NEWLINE}   {
-                    loc.lines();
-                    loc.step();
-                    throw parse::Parser::syntax_error(
-                            loc, "Unexpected new line inside string");
-                }
-    <<EOF>>     {
-                    throw parse::Parser::syntax_error(
-                            loc, "Unexpected EOF inside string");
-                }
-    .           { str.append(yytext); }
+    "\\\""          { str.append("\\\""); }
+    "\""            {
+                        BEGIN(INITIAL);
+                        str.append("\"");
+                        return parse::Parser::make_STRING(str, loc);
+                    }
+    "\\"{NEWLINE}   {
+                        loc.lines();
+                        loc.step();
+                    }
+    {NEWLINE}       {
+                        loc.lines();
+                        loc.step();
+                        throw parse::Parser::syntax_error(
+                                loc, "Unexpected new line inside string");
+                    }
+    <<EOF>>         {
+                        throw parse::Parser::syntax_error(
+                                loc, "Unexpected EOF inside string");
+                    }
+    .               { str.append(yytext); }
 }
+
+"(" { return parse::Parser::make_LPAREN(loc); }
+")" { return parse::Parser::make_RPAREN(loc); }
+"{" { return parse::Parser::make_LBRACE(loc); }
+"}" { return parse::Parser::make_RBRACE(loc); }
+"," { return parse::Parser::make_COMMA(loc); }
 
 {IDENTIFIER}    { return parse::Parser::make_ID(yytext, loc); }
 "\\"{NEWLINE}   {
                     loc.lines();
                     loc.step();
+                    return parse::Parser::make_NEWLINE(loc);
                 }
 {NEWLINE}       {
                     loc.lines();
