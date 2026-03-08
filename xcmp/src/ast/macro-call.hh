@@ -4,13 +4,13 @@
 #include <vector>
 
 #include "ast.hh"
+#include "document.hh"
 
 namespace ast {
     class MacroCall : public Ast {
     public:
         using UPtr = std::unique_ptr<MacroCall>;
-        using MacroArg = std::vector<Ast::UPtr>;
-        using MacroArgs = std::vector<MacroArg>;
+        using MacroArgs = std::vector<ast::Document::UPtr>;
 
         MacroCall(const parse::Location& loc, const std::string& id,
                   MacroArgs args, bool spaced = false);

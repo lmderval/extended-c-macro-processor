@@ -14,12 +14,9 @@ namespace ast {
 
     void PrettyPrinter::operator()(const MacroCall& e) {
         ps_ << e.get_identifier() << "(";
-        for (auto arg_it = e.get_args().cbegin(); arg_it != e.get_args().cend();
-             arg_it++) {
-            if (arg_it != e.get_args().cbegin()) ps_ << ",";
-            for (auto it = arg_it->cbegin(); it != arg_it->cend(); it++) {
-                (*it)->accept(*this);
-            }
+        for (auto it = e.get_args().cbegin(); it != e.get_args().cend(); it++) {
+            if (it != e.get_args().cbegin()) ps_ << ",";
+            (*it)->accept(*this);
         }
         ps_ << ")";
     }

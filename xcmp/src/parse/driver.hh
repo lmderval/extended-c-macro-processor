@@ -14,6 +14,7 @@ namespace parse {
     public:
         Location& get_loc();
         const ast::Document* get_document() const;
+        ast::Document::UPtr grab_document();
 
         int parse(std::istream& is, const std::string& filename);
         int parse(const std::string& filename);

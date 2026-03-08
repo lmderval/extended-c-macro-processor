@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+
 #include <parse/location.hh>
 
 #include "visitor.hh"

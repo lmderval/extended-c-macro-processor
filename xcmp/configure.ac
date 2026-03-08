@@ -26,6 +26,7 @@ AC_CONFIG_FILES([
     src/parse/gen/Makefile
     src/parse/tests/Makefile
     src/process/Makefile
+    src/misc/Makefile
 ])
 
 AC_OUTPUT
