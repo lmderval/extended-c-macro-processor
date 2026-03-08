@@ -24,6 +24,7 @@
 
     #include <ast/fwd.hh>
     #include <ast/macro-def.hh>
+    #include <ast/macro-call.hh>
 
     namespace parse {
         class Lexer;
@@ -62,8 +63,9 @@
 %nterm <std::vector<ast::Ast*>*>                document.1
 %nterm <ast::Ast*>                              directive
 %nterm <ast::Ast*>                              text text.1
-%nterm <std::vector<ast::Ast*>*>                arg  arg.1
-%nterm <std::vector<std::vector<ast::Ast*>*>*>  args
+%nterm <ast::Document*>                         arg
+%nterm <std::vector<ast::Ast*>*>                arg.1
+%nterm <ast::MacroCall::MacroArgs*>             args
 %nterm <ast::MacroDef::MacroPars*>              pars
 
 %expect 0
@@ -123,24 +125,21 @@ text.1:
                                 delete vec;
                             }
   | ID "(" args ")"         {
-                                auto vec = $3;
-                                ast::MacroCall::MacroArgs args;
-                                for (auto arg_it : *vec) {
-                                    ast::MacroCall::MacroArg arg;
-                                    for (auto it : *arg_it) {
-                                        arg.emplace_back(it);
-                                    }
-                                    args.push_back(std::move(arg));
-                                    delete arg_it;
-                                }
-                                $$ = new ast::MacroCall(@$, $1, std::move(args));
-                                delete vec;
+                                ast::MacroCall::MacroArgs* args = $3;
+                                $$ = new ast::MacroCall(@$, $1, std::move(*args));
+                                delete args;
                             }
   ;
 
 arg:
-    %empty  { $$ = new std::vector<ast::Ast*>(); }
-  | arg.1   { $$ = $1; }
+    %empty  { $$ = new ast::Document(@$, std::vector<ast::Ast::UPtr>()); }
+  | arg.1   {
+                auto vec = $1;
+                std::vector<ast::Ast::UPtr> body;
+                for (auto it : *vec) body.emplace_back(it);
+                $$ = new ast::Document(@$, std::move(body));
+                delete vec;
+            }
   ;
 
 arg.1:
@@ -158,13 +157,13 @@ arg.1:
 
 args:
     arg             {
-                        auto vec = new std::vector<std::vector<ast::Ast*>*>();
-                        vec->push_back($1);
+                        auto vec = new ast::MacroCall::MacroArgs();
+                        vec->emplace_back($1);
                         $$ = vec;
                     }
   | args "," arg    {
                         auto vec = $1;
-                        vec->push_back($3);
+                        vec->emplace_back($3);
                         $$ = vec;
                     }
   ;
