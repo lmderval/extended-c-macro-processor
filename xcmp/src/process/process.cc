@@ -1,14 +1,30 @@
 #include "process.hh"
 
-#include <cstddef>
-#include <string>
+#include <ast/document.hh>
+#include <expected>
+#include <parse/driver.hh>
+#include "ast/pretty-printer.hh"
 
 namespace process {
-    void process(std::istream& is, std::ostream& os) {
-        std::size_t line_number = 1;
-        for (std::string line; std::getline(is, line);) {
-            os << line_number << '\t' << line << std::endl;
-            line_number++;
+    static std::expected<ast::Document::UPtr, std::string>
+    parse_stream(std::istream& is, const std::string& filename) {
+        parse::Driver driver;
+        if (driver.parse(is, filename) != 0)
+            return std::unexpected("unable to parse input file: " + filename);
+
+        ast::Document::UPtr document = driver.grab_document();
+        return document;
+    }
+
+    void process(std::istream& is, std::ostream& os,
+                 const std::string& filename) {
+        auto document = parse_stream(is, filename);
+        if (!document.has_value()) {
+            std::cerr << document.error() << std::endl;
+            return;
         }
+
+        ast::PrettyPrinter processor(os);
+        (*document)->accept(processor);
     }
 } // namespace process
