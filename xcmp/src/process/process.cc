@@ -1,9 +1,10 @@
 #include "process.hh"
 
-#include <ast/document.hh>
 #include <expected>
+
+#include <ast/document.hh>
+#include <ast/pretty-printer.hh>
 #include <parse/driver.hh>
-#include "ast/pretty-printer.hh"
 
 namespace process {
     static std::expected<ast::Document::UPtr, std::string>

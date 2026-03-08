@@ -49,10 +49,12 @@ FixNamespaceComments: true
 ForEachMacros: ['ILIST_FOREACH', 'ILIST_FOREACH_ENTRY']
 IncludeBlocks: Regroup
 IncludeCategories:
+    - Regex: '<.*\.(hh|hxx)>'
+      Priority: 2
     - Regex: '<.*>'
       Priority: 1
     - Regex: '.*'
-      Priority: 2
+      Priority: 3
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash
 IndentWidth: 4
