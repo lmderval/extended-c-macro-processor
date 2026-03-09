@@ -5,6 +5,7 @@
 #include <ast/document.hh>
 #include <ast/pretty-printer.hh>
 #include <parse/driver.hh>
+#include "processor.hh"
 
 namespace process {
     static std::expected<ast::Document::UPtr, std::string>
@@ -25,7 +26,14 @@ namespace process {
             return;
         }
 
-        ast::PrettyPrinter processor(os);
-        (*document)->accept(processor);
+        Processor processor;
+        auto new_document = processor.process(**document);
+        if (!new_document.has_value()) {
+            std::cerr << new_document.error() << std::endl;
+            return;
+        }
+
+        ast::PrettyPrinter printer(os);
+        (*new_document)->accept(printer);
     }
 } // namespace process

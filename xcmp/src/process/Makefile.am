@@ -2,7 +2,9 @@ lib_LTLIBRARIES = libprocess.la
 
 libprocess_la_SOURCES = \
 	process.hh \
-	process.cc
+	process.cc \
+	processor.hh \
+	processor.cc
 
 libprocess_la_CPPFLAGS = -I$(top_srcdir)/src
 
