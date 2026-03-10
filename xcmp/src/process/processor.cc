@@ -1,10 +1,23 @@
 #include "processor.hh"
 
+#include <cassert>
 #include <sstream>
 
 #include <ast/all.hh>
 
 namespace process {
+    Processor::Processor()
+        : macros_()
+        , result_() {
+        macros_.enter();
+    }
+
+    Processor::~Processor() {
+        assert(!macros_.empty());
+        macros_.leave();
+        assert(macros_.empty());
+    }
+
     std::expected<ast::Ast::UPtr, std::string>
     Processor::process(const ast::Ast& e) {
         e.accept(*this);
@@ -20,19 +33,25 @@ namespace process {
                 + def.get_name());
         }
 
-        std::vector<ast::MacroDef::UPtr> pars;
-        for (std::size_t i = 0; i < def.get_pars().size(); i++) {
-            auto arg = process(*args[i]);
-            if (!arg.has_value()) return arg;
-            std::string name = def.get_pars()[i];
-            auto par_def = std::make_unique<ast::MacroDef>(
-                def.get_loc(), name, ast::MacroDef::MacroPars(),
-                std::move(*arg));
-            pars.push_back(std::move(par_def));
-            macros_.emplace(name, pars.back().get());
-        }
+        std::expected<ast::Ast::UPtr, std::string> body;
+        macros_.enter();
+        {
+            std::vector<ast::MacroDef::UPtr> pars;
+            for (std::size_t i = 0; i < def.get_pars().size(); i++) {
+                auto arg = process(*args[i]);
+                if (!arg.has_value()) return arg;
+                std::string name = def.get_pars()[i];
+                auto par_def = std::make_unique<ast::MacroDef>(
+                    def.get_loc(), name, ast::MacroDef::MacroPars(),
+                    std::move(*arg));
+                pars.push_back(std::move(par_def));
+                macros_.emplace(name, pars.back().get());
+            }
 
-        auto body = process(def.get_body());
+            body = process(def.get_body());
+        }
+        macros_.leave();
+
         return body;
     }
 
@@ -51,7 +70,8 @@ namespace process {
 
     void Processor::operator()(const ast::Identifier& e) {
         if (macros_.contains(e.get_id())) {
-            result_ = expand(*macros_[e.get_id()], ast::MacroCall::MacroArgs());
+            result_ =
+                expand(*macros_.at(e.get_id()), ast::MacroCall::MacroArgs());
             return;
         }
 
@@ -60,7 +80,7 @@ namespace process {
 
     void Processor::operator()(const ast::MacroCall& e) {
         if (macros_.contains(e.get_identifier())) {
-            result_ = expand(*macros_[e.get_identifier()], e.get_args());
+            result_ = expand(*macros_.at(e.get_identifier()), e.get_args());
             return;
         }
 
@@ -87,7 +107,7 @@ namespace process {
     }
 
     void Processor::operator()(const ast::MacroDef& e) {
-        if (macros_.contains(e.get_name())) {
+        if (macros_.top_contains(e.get_name())) {
             result_ = std::unexpected<std::string>("try to redefine macro: "
                                                    + e.get_name());
             return;
