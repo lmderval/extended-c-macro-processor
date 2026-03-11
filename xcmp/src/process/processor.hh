@@ -19,7 +19,16 @@ namespace process {
 
     private:
         std::expected<ast::Ast::UPtr, std::string>
-        expand(const ast::MacroDef& def, const ast::MacroCall::MacroArgs& args);
+        expand(const ast::MacroDef& def, const ast::MacroCall& e);
+
+        std::expected<ast::Ast::UPtr, std::string>
+        expand(const ast::MacroDef& def, const ast::Identifier& e);
+
+        std::expected<ast::Ast::UPtr, std::string>
+        expand_as_identifier(const ast::MacroDef& def, const ast::MacroCall& e);
+
+        std::expected<ast::Ast::UPtr, std::string>
+        output_args(const ast::MacroCall& e);
 
     public:
         void operator()(const ast::Document& e) override;
