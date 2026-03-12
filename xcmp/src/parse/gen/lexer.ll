@@ -123,8 +123,14 @@ SPACE [ \t]
                     loc.step();
                     return parse::Parser::make_NEWLINE(loc);
                 }
-^{SPACE}+       { return parse::Parser::make_TEXT(yytext, loc); }
-{SPACE}+        { return parse::Parser::make_TEXT(" ", loc); }
+^{SPACE}+       {
+                    loc.step();
+                    return parse::Parser::make_TEXT(yytext, loc);
+                }
+{SPACE}+        {
+                    loc.step();
+                    return parse::Parser::make_TEXT(" ", loc);
+                }
 .               { return parse::Parser::make_TEXT(yytext, loc); }
 <<EOF>>         { return parse::Parser::make_YYEOF(loc); }
 %%

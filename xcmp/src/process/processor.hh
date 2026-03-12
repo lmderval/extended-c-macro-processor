@@ -40,5 +40,6 @@ namespace process {
     private:
         misc::scoped_map<std::string, const ast::MacroDef*> macros_;
         std::expected<ast::Ast::UPtr, std::string> result_;
+        bool prev_expanded_ = false;
     };
 } // namespace process

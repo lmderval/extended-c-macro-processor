@@ -20,6 +20,26 @@ namespace process {
                << *e.get_loc().end.filename << "\"\n";
             return std::make_unique<ast::Text>(e.get_loc(), ss.str());
         }
+
+        ast::Text::UPtr make_padding(const ast::Ast& e, int offset = 0) {
+            std::stringstream ss;
+            for (int i = 1; i < e.get_loc().begin.column + offset; i++)
+                ss << " ";
+            return std::make_unique<ast::Text>(e.get_loc(), ss.str());
+        }
+
+        ast::Ast::UPtr add_padding(ast::Ast::UPtr e) {
+            auto loc = e->get_loc();
+
+            std::vector<ast::Ast::UPtr> body;
+            body.push_back(make_padding(*e));
+            body.push_back(std::move(e));
+            return std::make_unique<ast::Document>(loc, std::move(body));
+        }
+
+        inline bool no_padding(const std::string& s) {
+            return s.empty() || s[0] == ' ';
+        }
     } // namespace
 
     Processor::Processor()
@@ -80,6 +100,8 @@ namespace process {
 
         body.push_back(make_end_directive(e));
 
+        prev_expanded_ = true;
+
         return std::make_unique<ast::Document>(e.get_loc(), std::move(body));
     }
 
@@ -105,6 +127,8 @@ namespace process {
 
         body.push_back(make_end_directive(e));
 
+        prev_expanded_ = true;
+
         return std::make_unique<ast::Document>(e.get_loc(), std::move(body));
     }
 
@@ -125,6 +149,8 @@ namespace process {
 
         body.push_back(make_end_directive(e));
 
+        prev_expanded_ = true;
+
         auto args = output_args(e);
         if (!args.has_value()) return args;
         body.push_back(std::move(*args));
@@ -135,6 +161,11 @@ namespace process {
     std::expected<ast::Ast::UPtr, std::string>
     Processor::output_args(const ast::MacroCall& e) {
         std::vector<ast::Ast::UPtr> body;
+
+        if (prev_expanded_)
+            body.push_back(make_padding(e, e.get_identifier().size()));
+
+        prev_expanded_ = false;
 
         if (e.get_spaced())
             body.push_back(std::make_unique<ast::Text>(e.get_loc(), " "));
@@ -171,7 +202,14 @@ namespace process {
             return;
         }
 
-        result_ = std::make_unique<ast::Text>(e.get_loc(), e.get_id());
+        auto text = std::make_unique<ast::Text>(e.get_loc(), e.get_id());
+        if (!prev_expanded_) {
+            result_ = std::move(text);
+            return;
+        }
+
+        result_ = add_padding(std::move(text));
+        prev_expanded_ = false;
     }
 
     void Processor::operator()(const ast::MacroCall& e) {
@@ -209,6 +247,15 @@ namespace process {
     }
 
     void Processor::operator()(const ast::Text& e) {
+        if (prev_expanded_ && no_padding(e.get_text())) {
+            result_ = std::make_unique<ast::Text>(e.get_loc(), "");
+            return;
+        }
+
         result_ = std::make_unique<ast::Text>(e.get_loc(), e.get_text());
+        if (prev_expanded_ && e.get_text()[0] != '\n')
+            result_ = add_padding(std::move(*result_));
+
+        prev_expanded_ = false;
     }
 } // namespace process
