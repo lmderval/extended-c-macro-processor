@@ -46,6 +46,10 @@ SPACE [ \t]
 %x STRING
 
 %%
+%{
+    loc.step();
+%}
+
 ^{SPACE}*"%define"  {
                         BEGIN(DIRECTIVE);
                         return parse::Parser::make_DEFINE_DIRECTIVE(loc);
@@ -60,7 +64,6 @@ SPACE [ \t]
     {IDENTIFIER}    { return parse::Parser::make_ID(yytext, loc); }
     {NEWLINE}       {
                         loc.lines();
-                        loc.step();
                         BEGIN(INITIAL);
                         return parse::Parser::make_NEWLINE(loc);
                     }
@@ -91,11 +94,9 @@ SPACE [ \t]
                     }
     "\\"{NEWLINE}   {
                         loc.lines();
-                        loc.step();
                     }
     {NEWLINE}       {
                         loc.lines();
-                        loc.step();
                         throw parse::Parser::syntax_error(
                                 loc, "Unexpected new line inside string");
                     }
@@ -115,22 +116,13 @@ SPACE [ \t]
 {IDENTIFIER}    { return parse::Parser::make_ID(yytext, loc); }
 "\\"{NEWLINE}   {
                     loc.lines();
-                    loc.step();
                     return parse::Parser::make_NEWLINE(loc);
                 }
 {NEWLINE}       {
                     loc.lines();
-                    loc.step();
                     return parse::Parser::make_NEWLINE(loc);
                 }
-^{SPACE}+       {
-                    loc.step();
-                    return parse::Parser::make_TEXT(yytext, loc);
-                }
-{SPACE}+        {
-                    loc.step();
-                    return parse::Parser::make_TEXT(" ", loc);
-                }
+{SPACE}+        { return parse::Parser::make_TEXT(yytext, loc); }
 .               { return parse::Parser::make_TEXT(yytext, loc); }
 <<EOF>>         { return parse::Parser::make_YYEOF(loc); }
 %%

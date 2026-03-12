@@ -73,6 +73,9 @@ namespace process {
         std::vector<ast::Ast::UPtr> body;
 
         body.push_back(make_begin_directive(def.get_body()));
+        body.push_back(make_padding(def.is_parameter()
+                                        ? static_cast<const ast::Ast&>(def)
+                                        : static_cast<const ast::Ast&>(e)));
 
         macros_.enter();
         {
@@ -80,14 +83,15 @@ namespace process {
             for (std::size_t i = 0; i < def.get_pars().size(); i++) {
                 auto arg = process(*args[i]);
                 if (!arg.has_value()) return arg;
+                auto loc = (*arg)->get_loc();
                 std::string name = def.get_pars()[i];
                 std::vector<ast::Ast::UPtr> body;
                 body.push_back(std::move(*arg));
-                body.push_back(std::make_unique<ast::Text>(e.get_loc(), "\n"));
+                body.push_back(std::make_unique<ast::Text>(loc, "\n"));
                 auto par_def = std::make_unique<ast::MacroDef>(
-                    def.get_loc(), name, ast::MacroDef::MacroPars(),
-                    std::make_unique<ast::Document>(e.get_loc(),
-                                                    std::move(body)));
+                    loc, name, ast::MacroDef::MacroPars(),
+                    std::make_unique<ast::Document>(loc, std::move(body)),
+                    true);
                 pars.push_back(std::move(par_def));
                 macros_.emplace(name, pars.back().get());
             }
@@ -116,6 +120,9 @@ namespace process {
         std::vector<ast::Ast::UPtr> body;
 
         body.push_back(make_begin_directive(def.get_body()));
+        body.push_back(make_padding(def.is_parameter()
+                                        ? static_cast<const ast::Ast&>(def)
+                                        : static_cast<const ast::Ast&>(e)));
 
         macros_.enter();
         {
@@ -138,6 +145,9 @@ namespace process {
         std::vector<ast::Ast::UPtr> body;
 
         body.push_back(make_begin_directive(def.get_body()));
+        body.push_back(make_padding(def.is_parameter()
+                                        ? static_cast<const ast::Ast&>(def)
+                                        : static_cast<const ast::Ast&>(e)));
 
         macros_.enter();
         {
