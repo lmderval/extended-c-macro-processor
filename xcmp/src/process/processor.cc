@@ -21,24 +21,39 @@ namespace process {
             return std::make_unique<ast::Text>(e.get_loc(), ss.str());
         }
 
-        ast::Text::UPtr make_padding(const ast::Ast& e, int offset = 0) {
+        ast::Text::UPtr make_padding(const parse::Location& loc,
+                                     int offset = 0) {
             std::stringstream ss;
-            for (int i = 1; i < e.get_loc().begin.column + offset; i++)
-                ss << " ";
-            return std::make_unique<ast::Text>(e.get_loc(), ss.str());
+            for (int i = 1; i < loc.begin.column + offset; i++) ss << " ";
+            parse::Position begin(loc.begin.filename, loc.begin.line, 1);
+            parse::Position end(loc.end.filename, loc.begin.line,
+                                loc.begin.column);
+            parse::Location new_loc(begin, end);
+            return std::make_unique<ast::Text>(new_loc, ss.str());
+        }
+
+        ast::Text::UPtr make_padding(const ast::Ast& e, int offset = 0) {
+            return make_padding(e.get_loc(), offset);
+        }
+
+        ast::Text::UPtr make_padding_at_end(const parse::Location& loc) {
+            return make_padding(loc, loc.end.column - loc.begin.column);
         }
 
         ast::Ast::UPtr add_padding(ast::Ast::UPtr e) {
-            auto loc = e->get_loc();
-
             std::vector<ast::Ast::UPtr> body;
             body.push_back(make_padding(*e));
             body.push_back(std::move(e));
+            parse::Location loc(body.front()->get_loc().begin,
+                                body.back()->get_loc().end);
             return std::make_unique<ast::Document>(loc, std::move(body));
         }
 
-        inline bool no_padding(const std::string& s) {
-            return s.empty() || s[0] == ' ';
+        ast::Text::UPtr make_after(const parse::Location& loc,
+                                   const std::string& text) {
+            parse::Location new_loc(loc.end);
+            new_loc.columns(text.size());
+            return std::make_unique<ast::Text>(new_loc, text);
         }
     } // namespace
 
@@ -73,17 +88,16 @@ namespace process {
         std::vector<ast::Ast::UPtr> body;
 
         body.push_back(make_begin_directive(def.get_body()));
-        body.push_back(make_padding(def.is_parameter()
-                                        ? static_cast<const ast::Ast&>(def)
-                                        : static_cast<const ast::Ast&>(e)));
+        body.push_back(make_padding(def.get_body()));
+        need_padding_ = false;
 
         macros_.enter();
         {
             std::vector<ast::MacroDef::UPtr> pars;
             for (std::size_t i = 0; i < def.get_pars().size(); i++) {
+                auto loc = args[i]->get_loc();
                 auto arg = process(*args[i]);
                 if (!arg.has_value()) return arg;
-                auto loc = (*arg)->get_loc();
                 std::string name = def.get_pars()[i];
                 std::vector<ast::Ast::UPtr> body;
                 body.push_back(std::move(*arg));
@@ -103,8 +117,7 @@ namespace process {
         macros_.leave();
 
         body.push_back(make_end_directive(e));
-
-        prev_expanded_ = true;
+        need_padding_ = true;
 
         return std::make_unique<ast::Document>(e.get_loc(), std::move(body));
     }
@@ -120,9 +133,8 @@ namespace process {
         std::vector<ast::Ast::UPtr> body;
 
         body.push_back(make_begin_directive(def.get_body()));
-        body.push_back(make_padding(def.is_parameter()
-                                        ? static_cast<const ast::Ast&>(def)
-                                        : static_cast<const ast::Ast&>(e)));
+        body.push_back(make_padding(def.get_body()));
+        need_padding_ = false;
 
         macros_.enter();
         {
@@ -133,8 +145,7 @@ namespace process {
         macros_.leave();
 
         body.push_back(make_end_directive(e));
-
-        prev_expanded_ = true;
+        need_padding_ = true;
 
         return std::make_unique<ast::Document>(e.get_loc(), std::move(body));
     }
@@ -145,9 +156,8 @@ namespace process {
         std::vector<ast::Ast::UPtr> body;
 
         body.push_back(make_begin_directive(def.get_body()));
-        body.push_back(make_padding(def.is_parameter()
-                                        ? static_cast<const ast::Ast&>(def)
-                                        : static_cast<const ast::Ast&>(e)));
+        body.push_back(make_padding(def.get_body()));
+        need_padding_ = false;
 
         macros_.enter();
         {
@@ -158,8 +168,7 @@ namespace process {
         macros_.leave();
 
         body.push_back(make_end_directive(e));
-
-        prev_expanded_ = true;
+        need_padding_ = true;
 
         auto args = output_args(e);
         if (!args.has_value()) return args;
@@ -172,29 +181,58 @@ namespace process {
     Processor::output_args(const ast::MacroCall& e) {
         std::vector<ast::Ast::UPtr> body;
 
-        if (prev_expanded_)
+        parse::Location loc(e.get_loc().begin);
+        loc.columns(e.get_identifier().size());
+
+        if (need_padding_) {
             body.push_back(make_padding(e, e.get_identifier().size()));
+            need_padding_ = false;
+            loc = body.back()->get_loc();
+        }
 
-        prev_expanded_ = false;
+        if (e.get_spaced()) {
+            body.push_back(make_after(loc, " "));
+            loc = body.back()->get_loc();
+        }
 
-        if (e.get_spaced())
-            body.push_back(std::make_unique<ast::Text>(e.get_loc(), " "));
+        body.push_back(make_after(loc, "("));
+        loc = body.back()->get_loc();
 
-        body.push_back(std::make_unique<ast::Text>(e.get_loc(), "("));
         for (auto it = e.get_args().cbegin(); it != e.get_args().cend(); it++) {
-            if (it != e.get_args().cbegin())
-                body.push_back(std::make_unique<ast::Text>(e.get_loc(), ","));
+            if (it != e.get_args().cbegin()) {
+                if (need_padding_) {
+                    body.push_back(make_padding_at_end(loc));
+                    need_padding_ = false;
+                    loc = body.back()->get_loc();
+                }
+
+                body.push_back(make_after(loc, ","));
+            }
+            loc = (*it)->get_loc();
             auto arg = process(**it);
             if (!arg.has_value()) return arg;
             body.push_back(std::move(*arg));
         }
-        body.push_back(std::make_unique<ast::Text>(e.get_loc(), ")"));
+
+        if (need_padding_) {
+            body.push_back(make_padding_at_end(loc));
+            need_padding_ = false;
+            loc = body.back()->get_loc();
+        }
+
+        body.push_back(make_after(loc, ")"));
 
         return std::make_unique<ast::Document>(e.get_loc(), std::move(body));
     }
 
     void Processor::operator()(const ast::Document& e) {
         std::vector<ast::Ast::UPtr> body;
+
+        if (need_padding_) {
+            body.push_back(make_padding(e));
+            need_padding_ = false;
+        }
+
         for (const ast::Ast::UPtr& child : e.get_body()) {
             auto new_child = process(*child);
             if (!new_child.has_value()) {
@@ -213,13 +251,14 @@ namespace process {
         }
 
         auto text = std::make_unique<ast::Text>(e.get_loc(), e.get_id());
-        if (!prev_expanded_) {
-            result_ = std::move(text);
+
+        if (need_padding_) {
+            result_ = add_padding(std::move(text));
+            need_padding_ = false;
             return;
         }
 
-        result_ = add_padding(std::move(text));
-        prev_expanded_ = false;
+        result_ = std::move(text);
     }
 
     void Processor::operator()(const ast::MacroCall& e) {
@@ -231,8 +270,14 @@ namespace process {
         }
 
         std::vector<ast::Ast::UPtr> body;
-        body.push_back(
-            std::make_unique<ast::Text>(e.get_loc(), e.get_identifier()));
+
+        if (need_padding_) {
+            body.push_back(make_padding(e));
+            need_padding_ = false;
+        }
+
+        parse::Location loc(e.get_loc().begin);
+        body.push_back(make_after(loc, e.get_identifier()));
 
         auto args = output_args(e);
         if (!args.has_value()) {
@@ -254,18 +299,17 @@ namespace process {
         macros_.emplace(e.get_name(), &e);
 
         result_ = make_end_directive(e);
+        need_padding_ = false;
     }
 
     void Processor::operator()(const ast::Text& e) {
-        if (prev_expanded_ && no_padding(e.get_text())) {
-            result_ = std::make_unique<ast::Text>(e.get_loc(), "");
+        auto text = std::make_unique<ast::Text>(e.get_loc(), e.get_text());
+        if (need_padding_) {
+            result_ = add_padding(std::move(text));
+            need_padding_ = false;
             return;
         }
 
-        result_ = std::make_unique<ast::Text>(e.get_loc(), e.get_text());
-        if (prev_expanded_ && e.get_text()[0] != '\n')
-            result_ = add_padding(std::move(*result_));
-
-        prev_expanded_ = false;
+        result_ = std::move(text);
     }
 } // namespace process
