@@ -19,20 +19,24 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         xcmp = import ./xcmp { inherit pkgs; };
+        xcmgen = import ./xcmgen { inherit pkgs; };
       in
       {
         packages = {
           xcmp = xcmp.package;
+          xcmgen = xcmgen.package;
           default = xcmp.package;
         };
 
         devShells = {
           xcmp = xcmp.devShell;
+          xcmgen = xcmgen.devShell;
           default = xcmp.devShell;
         };
 
         images = {
           xcmp = xcmp.image;
+          xcmgen = xcmgen.image;
         };
 
         formatter = pkgs.nixpkgs-fmt;
