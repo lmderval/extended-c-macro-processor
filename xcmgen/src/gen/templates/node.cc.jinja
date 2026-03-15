@@ -1,0 +1,22 @@
+#include "{{ node.name | kebab }}.hh"
+
+namespace ast {
+    {{ node.name }}::{{ node.name }}(const parse::Location& loc
+{%- for member in node.members if member.ctor -%}
+    , {{ member.type.W_type() }} {{ member.name }}
+{%- endfor -%}
+    )
+        : Ast(loc)
+{% for member in node.members if member.ctor %}
+        , {{ member.name }}_(
+    {%- if member.type.requires_move() -%}
+        std::move({{ member.name }})
+    {%- else -%}
+        {{ member.name }}
+    {%- endif -%}
+        )
+    {%- if loop.last %}
+ {}
+    {%- endif +%}
+{% endfor %}
+} // namespace ast

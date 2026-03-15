@@ -1,0 +1,74 @@
+#pragma once
+{% if node.sys_includes %}
+
+    {% for incl in node.sys_includes | sort %}
+#include <{{ incl }}>
+    {% endfor %}
+{% endif %}
+{% if node.includes %}
+
+    {% for incl in node.includes | sort %}
+#include <{{ incl }}.hh>
+    {% endfor %}
+{% endif %}
+{% if node.local_includes %}
+
+    {% for incl in node.local_includes | sort %}
+#include "{{ incl }}.hh"
+    {% endfor %}
+{% endif %}
+
+namespace ast {
+    class {{ node.name }} : public Ast {
+    public:
+{% if node.aliases %}
+    {% for alias in node.aliases %}
+        using {{ alias.name }} = {{ alias.type.store_type() }};
+    {% endfor %}
+
+{% endif %}
+        {{ node.name }}(const parse::Location& loc
+{%- for member in node.members if member.ctor -%}
+        , {{ member.type.W_type() }} {{ member.name }}
+    {%- if member.default_value is not none %}
+ = {{ member.default }}
+    {%- endif %}
+{%- endfor -%}
+        );
+        {{ node.name }}(const {{ node.name }}&) = delete;
+        {{ node.name }}& operator=(const {{ node.name }}&) = delete;
+
+        ~{{ node.name }}() override = default;
+
+    public:
+{% if node.members %}
+    {% for member in node.members %}
+        {% if member.r_acc %}
+        {{ member.type.r_type() }} get_{{ member.name }}() const;
+        {% endif %}
+        {% if member.w_acc %}
+        {{ member.type.w_type() }} get_{{ member.name }}();
+        {% endif %}
+        {% if member.W_acc %}
+        void set_{{ member.name }}({{ member.type.W_type() }} {{ member.name }});
+        {% endif %}
+    {% endfor %}
+
+{% endif %}
+        void accept(ConstVisitor& visitor) const override;
+        void accept(InvasiveVisitor& visitor) override;
+{% if node.members %}
+
+    private:
+    {% for member in node.members %}
+        {{ member.type.store_type() }} {{ member.name }}_
+        {%- if not member.ctor and member.default_value is not none %}
+ = {{ member.default }}
+        {%- endif -%}
+        ;
+    {% endfor %}
+{% endif %}
+    };
+} // namespace ast
+
+#include "{{ node.name | kebab }}.hxx"

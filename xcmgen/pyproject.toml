@@ -1,0 +1,27 @@
+[project]
+name = "xcmgen"
+version = "0.1.0"
+description = "AST nodes generator for xcmp"
+authors = [
+    { name = "Louis-Mael Derval", email = "louismaelderval@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "jinja2",
+    "toml",
+    "pydantic",
+]
+
+[project.scripts]
+xcmgen = "gen:generate"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/config",
+    "src/gen",
+    "src/utils",
+]
