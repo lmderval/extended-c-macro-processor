@@ -1,35 +1,54 @@
-{ pkgs }:
+{ pkgs, pytools }:
 let
-  pname = "xcmgen";
-  version = "0.0.0";
-
-  pypkgs = pkgs.python313Packages;
-
-  xcmgen = pkgs.stdenv.mkDerivation {
-    inherit pname version;
-    src = ./.;
-
-    buildInputs = with pypkgs; [
-      (python.withPackages (pypkgs: [
-        jinja2
-        toml
-      ]))
-    ];
+  workspace = pytools.uv2nix.lib.workspace.loadWorkspace {
+    workspaceRoot = ./.;
   };
+
+  python = pkgs.python313;
+
+  overlay = workspace.mkPyprojectOverlay {
+    sourcePreference = "wheel";
+  };
+
+  pythonSet =
+    (pkgs.callPackage pytools.py-nix.build.packages {
+      inherit python;
+    }).overrideScope
+      (
+        pkgs.lib.composeManyExtensions [
+          pytools.py-build.overlays.default
+          overlay
+        ]
+      );
+
+  virtualenv = pythonSet.mkVirtualEnv "xcmgen-env" workspace.deps.default;
+
+  xcmgen-pyproject = pytools.py-nix.lib.project.loadPyproject {
+    projectRoot = ./.;
+  };
+
+  xcmgen-attrs = xcmgen-pyproject.renderers.buildPythonPackage {
+    inherit python;
+  };
+
+  xcmgen = python.pkgs.buildPythonPackage xcmgen-attrs;
+
+  pname = xcmgen.pname;
+  version = xcmgen.version;
 in
 rec {
   package = xcmgen;
 
   devShell = pkgs.mkShell {
-    inputsFrom = [
-      xcmgen
+    buildInputs = [
+      pkgs.uv
+      virtualenv
     ];
 
-    buildInputs = with pypkgs; [
-      python-lsp-server
-      python-lsp-ruff
-      ruff
-    ];
+    env = {
+      UV_PYTHON = "${virtualenv}/bin/python";
+      UV_PYTHON_DOWNLOADS = "never";
+    };
   };
 
   image = pkgs.dockerTools.buildImage {
@@ -44,6 +63,11 @@ rec {
       ] ++ (
         devShell.nativeBuildInputs ++ devShell.buildInputs
       );
+    };
+    config = {
+      Env = [
+        "UV_PYTHON=${virtualenv}/bin/python"
+      ];
     };
   };
 }

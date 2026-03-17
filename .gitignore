@@ -29,3 +29,7 @@ libtool
 
 # misc
 compile_commands.json
+
+# python
+.venv/
+__pycache__/

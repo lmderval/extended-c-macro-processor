@@ -1,0 +1,23 @@
+[project]
+name = "xcmgen"
+version = "0.0.0"
+description = "Add your description here"
+authors = [
+    { name = "Louis-Mael Derval", email = "louismaelderval@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "jinja2",
+    "toml",
+]
+
+[project.scripts]
+xcmgen = "gen:generate"
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "gen"
+module-root = "src"

@@ -8,18 +8,41 @@
       url = "github:numtide/flake-utils";
       inputs.systems.follows = "systems";
     };
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.uv2nix.follows = "uv2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs =
     { self
     , nixpkgs
     , flake-utils
+    , uv2nix
+    , pyproject-nix
+    , pyproject-build-systems
     , ...
     }: (
       flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        pytools = {
+          inherit uv2nix;
+          py-nix = pyproject-nix;
+          py-build = pyproject-build-systems;
+        };
         xcmp = import ./xcmp { inherit pkgs; };
-        xcmgen = import ./xcmgen { inherit pkgs; };
+        xcmgen = import ./xcmgen { inherit pkgs pytools; };
       in
       {
         packages = {
