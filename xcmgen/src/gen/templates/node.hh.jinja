@@ -1,0 +1,60 @@
+#pragma once
+
+{% for incl in node.sys_includes %}
+#include {{ incl }}
+{% endfor %}
+
+{% for incl in node.includes %}
+#include {{ incl }}
+{% endfor %}
+
+{% for incl in node.local_includes %}
+#include {{ incl }}
+{% endfor %}
+
+namespace ast {
+    class {{ node.name }} {
+    public:
+        using UPtr = std::unique_ptr<{{ node.name }}>;
+
+        {{ node.name }}(const parse::Location& loc
+{%- for member in node.members if member.ctor -%}
+        , {{ member.W_type }} {{ member.name }}
+    {%- if member.default_value -%}
+        {{ ' ' }} = {{ member.default_value }}
+    {%- endif %}
+{%- endfor -%}
+        );
+        {{ node.name }}(const {{ node.name }}&) = delete;
+        {{ node.name }}& operator=(const {{ node.name }}&) = delete;
+
+        ~{{ node.name }}() override = default;
+
+    public:
+{% for member in node.members %}
+    {% if member.r_acc %}
+        {{ member.r_type }} get_{{ member.name }}() const;
+    {% endif %}
+    {% if member.w_acc %}
+        {{ member.w_type }} get_{{ member.name }}();
+    {% endif %}
+    {% if member.W_acc %}
+        void set_{{ member.name }}({{ member.W_type }} {{ member.name }});
+    {% endif %}
+{% endfor %}
+
+        void accept(ConstVisitor& visitor) const override;
+        void accept(InvasiveVisitor& visitor) override;
+
+    private:
+{% for member in node.members %}
+        {{ member.store_type }} {{ member.name }}_
+    {%- if not member.ctor and member.default_value  -%}
+        {{ ' ' }} = {{ member.default_value }}
+    {%- endif -%}
+        ;
+{% endfor %}
+    };
+} // namespace ast
+
+#include "{{ node.name | kebab }}.hxx"
