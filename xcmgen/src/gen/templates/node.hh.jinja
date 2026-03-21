@@ -1,33 +1,37 @@
 #pragma once
 {% if node.sys_includes %}
 
-    {% for incl in node.sys_includes %}
-#include {{ incl }}
+    {% for incl in node.sys_includes | sort %}
+#include <{{ incl }}>
     {% endfor %}
 {% endif %}
 {% if node.includes %}
 
-    {% for incl in node.includes %}
-#include {{ incl }}
+    {% for incl in node.includes | sort %}
+#include <{{ incl }}.hh>
     {% endfor %}
 {% endif %}
 {% if node.local_includes %}
 
-    {% for incl in node.local_includes %}
-#include {{ incl }}
+    {% for incl in node.local_includes | sort %}
+#include "{{ incl }}.hh"
     {% endfor %}
 {% endif %}
 
 namespace ast {
     class {{ node.name }} {
     public:
-        using UPtr = std::unique_ptr<{{ node.name }}>;
+{% if node.aliases %}
+    {% for alias in node.aliases %}
+        using {{ alias.name }} = {{ alias.type }};
+    {% endfor %}
 
+{% endif %}
         {{ node.name }}(const parse::Location& loc
 {%- for member in node.members if member.ctor -%}
         , {{ member.W_type }} {{ member.name }}
-    {%- if member.default_value -%}
-        {{ ' ' }} = {{ member.default_value }}
+    {%- if member.default_value is not none %}
+ = {{ member.default_value }}
     {%- endif %}
 {%- endfor -%}
         );
@@ -37,29 +41,33 @@ namespace ast {
         ~{{ node.name }}() override = default;
 
     public:
-{% for member in node.members %}
-    {% if member.r_acc %}
+{% if node.members %}
+    {% for member in node.members %}
+        {% if member.r_acc %}
         {{ member.r_type }} get_{{ member.name }}() const;
-    {% endif %}
-    {% if member.w_acc %}
+        {% endif %}
+        {% if member.w_acc %}
         {{ member.w_type }} get_{{ member.name }}();
-    {% endif %}
-    {% if member.W_acc %}
+        {% endif %}
+        {% if member.W_acc %}
         void set_{{ member.name }}({{ member.W_type }} {{ member.name }});
-    {% endif %}
-{% endfor %}
+        {% endif %}
+    {% endfor %}
 
+{% endif %}
         void accept(ConstVisitor& visitor) const override;
         void accept(InvasiveVisitor& visitor) override;
+{% if node.members %}
 
     private:
-{% for member in node.members %}
+    {% for member in node.members %}
         {{ member.store_type }} {{ member.name }}_
-    {%- if not member.ctor and member.default_value  -%}
-        {{ ' ' }} = {{ member.default_value }}
-    {%- endif -%}
+        {%- if not member.ctor and member.default_value is not none %}
+ = {{ member.default_value }}
+        {%- endif -%}
         ;
-{% endfor %}
+    {% endfor %}
+{% endif %}
     };
 } // namespace ast
 

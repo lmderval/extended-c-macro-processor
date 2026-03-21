@@ -2,6 +2,11 @@ from pydantic import BaseModel
 from typing import Any
 
 
+class AliasModel(BaseModel):
+    name: str
+    type: str
+
+
 class MemberModel(BaseModel):
     name: str
     store_type: str
@@ -20,6 +25,7 @@ class NodeModel(BaseModel):
     sys_includes: list[str] = []
     includes: list[str] = []
     local_includes: list[str] = []
+    aliases: list[AliasModel] = []
     members: list[MemberModel] = []
 
 
