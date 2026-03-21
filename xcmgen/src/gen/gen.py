@@ -2,6 +2,8 @@ from argparse import ArgumentParser
 from jinja2 import Environment, PackageLoader, select_autoescape
 import toml
 
+from config.config import ConfigModel
+
 from utils import name_utils
 
 
@@ -23,9 +25,9 @@ def create_environment() -> Environment:
     return env
 
 
-def read_config(config_path: str) -> dict:
+def read_config(config_path: str) -> ConfigModel:
     config = toml.load((config_path))
-    return config
+    return ConfigModel.model_validate(config)
 
 
 def generate():
@@ -34,4 +36,4 @@ def generate():
     config = read_config(args.config)
     env = create_environment()
     node_hh_template = env.get_template("node.hh.jinja")
-    print(node_hh_template.render(node=config["nodes"][0]))
+    print(node_hh_template.render(node=config.nodes[0]))

@@ -9,6 +9,7 @@ requires-python = ">=3.13"
 dependencies = [
     "jinja2",
     "toml",
+    "pydantic",
 ]
 
 [project.scripts]
