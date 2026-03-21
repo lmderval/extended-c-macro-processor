@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Any
+from typing import Optional
 
 
 class AliasModel(BaseModel):
@@ -17,7 +17,20 @@ class MemberModel(BaseModel):
     r_acc: bool = False
     w_acc: bool = False
     W_acc: bool = False
-    default_value: Any = None
+    default_value: Optional[bool | int | str] = None
+
+    @property
+    def default(self) -> str:
+        if self.default_value is None:
+            return None
+
+        if isinstance(self.default_value, bool):
+            return "true" if self.default_value else "false"
+
+        if isinstance(self.default_value, str):
+            return f'"{self.default_value}"'
+
+        return self.default_value
 
 
 class NodeModel(BaseModel):

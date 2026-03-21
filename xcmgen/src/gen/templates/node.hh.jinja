@@ -31,7 +31,7 @@ namespace ast {
 {%- for member in node.members if member.ctor -%}
         , {{ member.W_type }} {{ member.name }}
     {%- if member.default_value is not none %}
- = {{ member.default_value }}
+ = {{ member.default }}
     {%- endif %}
 {%- endfor -%}
         );
@@ -63,7 +63,7 @@ namespace ast {
     {% for member in node.members %}
         {{ member.store_type }} {{ member.name }}_
         {%- if not member.ctor and member.default_value is not none %}
- = {{ member.default_value }}
+ = {{ member.default }}
         {%- endif -%}
         ;
     {% endfor %}
