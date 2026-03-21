@@ -1,16 +1,22 @@
 #pragma once
+{% if node.sys_includes %}
 
-{% for incl in node.sys_includes %}
+    {% for incl in node.sys_includes %}
 #include {{ incl }}
-{% endfor %}
+    {% endfor %}
+{% endif %}
+{% if node.includes %}
 
-{% for incl in node.includes %}
+    {% for incl in node.includes %}
 #include {{ incl }}
-{% endfor %}
+    {% endfor %}
+{% endif %}
+{% if node.local_includes %}
 
-{% for incl in node.local_includes %}
+    {% for incl in node.local_includes %}
 #include {{ incl }}
-{% endfor %}
+    {% endfor %}
+{% endif %}
 
 namespace ast {
     class {{ node.name }} {

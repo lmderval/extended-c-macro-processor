@@ -20,6 +20,8 @@ def create_environment() -> Environment:
     env = Environment(
         loader=PackageLoader("gen"),
         autoescape=select_autoescape(),
+        trim_blocks=True,
+        lstrip_blocks=True,
     )
     env.filters["kebab"] = name_utils.kebab
     return env
