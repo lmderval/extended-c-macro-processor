@@ -163,6 +163,12 @@ class TypeModel(BaseModel):
 
         return W_type
 
+    def need_deref(self) -> bool:
+        if self.collection_type != CollectionTypeEnum.SINGLE:
+            return False
+
+        return self.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER
+
 
 class AliasModel(BaseModel):
     name: str

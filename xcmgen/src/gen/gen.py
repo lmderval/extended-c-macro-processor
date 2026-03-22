@@ -37,6 +37,11 @@ def generate():
     args = parser.parse_args()
     config = read_config(args.config)
     env = create_environment()
+
     node_hh_template = env.get_template("node.hh.jinja")
     for node in config.nodes:
         print(node_hh_template.render(node=node))
+
+    node_hxx_template = env.get_template("node.hxx.jinja")
+    for node in config.nodes:
+        print(node_hxx_template.render(node=node))
