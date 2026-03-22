@@ -5,7 +5,7 @@
 namespace ast {
     {{ node.name }}::{{ node.name }}(const parse::Location& loc
 {%- for member in node.members if member.ctor -%}
-    , {{ member.type.W_type }} {{ member.name }}
+    , {{ member.type.W_type() }} {{ member.name }}
 {%- endfor -%}
     )
         : Ast(loc)

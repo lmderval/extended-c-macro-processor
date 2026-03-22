@@ -5,7 +5,7 @@
 namespace ast {
 {% for member in node.members %}
     {% if member.r_acc %}
-    inline {{ member.type.r_type }} {{ node.name }}::get_{{ member.name }}() const {
+    inline {{ member.type.r_type(True) }} {{ node.name }}::get_{{ member.name }}() const {
         {% if member.type.need_deref() %}
         return *{{ member.name }}_;
         {% else %}
@@ -15,7 +15,7 @@ namespace ast {
 
     {% endif %}
     {% if member.w_acc %}
-    inline {{ member.type.w_type }} {{ node.name }}::get_{{ member.name }}() {
+    inline {{ member.type.w_type(True) }} {{ node.name }}::get_{{ member.name }}() {
         {% if member.type.need_deref() %}
         return *{{ member.name }}_;
         {% else %}
@@ -25,7 +25,7 @@ namespace ast {
 
     {% endif %}
     {% if member.W_acc %}
-    inline void {{ node.name }}::set_{{ member.name }}({{ member.type.W_type }} {{ member.name }}) {
+    inline void {{ node.name }}::set_{{ member.name }}({{ member.type.W_type() }} {{ member.name }}) {
         {{ member.name }}_ = {{ member.name }};
     }
 

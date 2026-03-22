@@ -80,9 +80,9 @@ class TypeModel(BaseModel):
 
         return self
 
-    @property
-    def store_type(self) -> str:
-        store_type = self.root_type
+    def store_type(self, include_namespace: bool = False) -> str:
+        namespace = self.namespace if include_namespace else ""
+        store_type = f"{namespace}{self.root_type}"
         store_type = self.box_storage_semantics(store_type)
         store_type = self.box_collection_type(store_type)
         return store_type
@@ -110,11 +110,11 @@ class TypeModel(BaseModel):
 
         return False
 
-    @property
-    def r_type(self) -> str:
+    def r_type(self, include_namespace: bool = False) -> str:
+        namespace = self.namespace if include_namespace else ""
         type = self.retrieve_alias()
         if type.collection_type != CollectionTypeEnum.SINGLE:
-            r_type = self.store_type
+            r_type = self.store_type(include_namespace)
             r_type = f"const {r_type}&"
             return r_type
 
@@ -123,29 +123,28 @@ class TypeModel(BaseModel):
             return r_type
 
         if self.is_optional():
-            return f"const {r_type}*"
+            return f"const {namespace}{r_type}*"
         else:
-            return f"const {r_type}&"
+            return f"const {namespace}{r_type}&"
 
-    @property
-    def w_type(self) -> str:
+    def w_type(self, include_namespace: bool = False) -> str:
+        namespace = self.namespace if include_namespace else ""
         type = self.retrieve_alias()
         if type.collection_type != CollectionTypeEnum.SINGLE:
-            w_type = self.store_type
+            w_type = self.store_type(include_namespace)
             w_type = f"{w_type}&"
             return w_type
 
         w_type = self.root_type
         if self.is_optional():
-            return f"{w_type}*"
+            return f"{namespace}{w_type}*"
         else:
-            return f"{w_type}&"
+            return f"{namespace}{w_type}&"
 
-    @property
     def W_type(self) -> str:
         type = self.retrieve_alias()
         if type.collection_type != CollectionTypeEnum.SINGLE:
-            W_type = self.store_type
+            W_type = self.store_type()
             match type.storage_semantics:
                 case StorageSemanticsEnum.PLAIN:
                     W_type = f"const {W_type}&"
@@ -154,10 +153,10 @@ class TypeModel(BaseModel):
             return W_type
 
         if type.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER:
-            W_type = self.store_type
+            W_type = self.store_type()
             return f"{W_type}&&"
 
-        W_type = self.store_type
+        W_type = self.store_type()
         if not self.is_primitive_type():
             W_type = f"const {W_type}&"
 
@@ -168,6 +167,13 @@ class TypeModel(BaseModel):
             return False
 
         return self.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER
+
+    @property
+    def namespace(self) -> str:
+        if self.is_alias():
+            return f"{self._node.name}::"
+
+        return ""
 
 
 class AliasModel(BaseModel):
