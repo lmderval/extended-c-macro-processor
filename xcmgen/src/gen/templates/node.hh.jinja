@@ -23,13 +23,13 @@ namespace ast {
     public:
 {% if node.aliases %}
     {% for alias in node.aliases %}
-        using {{ alias.name }} = {{ alias.type }};
+        using {{ alias.name }} = {{ alias.type.store_type }};
     {% endfor %}
 
 {% endif %}
         {{ node.name }}(const parse::Location& loc
 {%- for member in node.members if member.ctor -%}
-        , {{ member.W_type }} {{ member.name }}
+        , {{ member.type.W_type }} {{ member.name }}
     {%- if member.default_value is not none %}
  = {{ member.default }}
     {%- endif %}
@@ -44,13 +44,13 @@ namespace ast {
 {% if node.members %}
     {% for member in node.members %}
         {% if member.r_acc %}
-        {{ member.r_type }} get_{{ member.name }}() const;
+        {{ member.type.r_type }} get_{{ member.name }}() const;
         {% endif %}
         {% if member.w_acc %}
-        {{ member.w_type }} get_{{ member.name }}();
+        {{ member.type.w_type }} get_{{ member.name }}();
         {% endif %}
         {% if member.W_acc %}
-        void set_{{ member.name }}({{ member.W_type }} {{ member.name }});
+        void set_{{ member.name }}({{ member.type.W_type }} {{ member.name }});
         {% endif %}
     {% endfor %}
 
@@ -61,7 +61,7 @@ namespace ast {
 
     private:
     {% for member in node.members %}
-        {{ member.store_type }} {{ member.name }}_
+        {{ member.type.store_type }} {{ member.name }}_
         {%- if not member.ctor and member.default_value is not none %}
  = {{ member.default }}
         {%- endif -%}

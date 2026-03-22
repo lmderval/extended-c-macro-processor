@@ -1,11 +1,14 @@
 from enum import Enum
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, PrivateAttr, model_validator
 from typing import Optional, Self
 
 
-class AliasModel(BaseModel):
-    name: str
-    type: str
+class NodeModel:
+    pass
+
+
+class ConfigModel:
+    pass
 
 
 class CollectionTypeEnum(str, Enum):
@@ -20,16 +23,27 @@ class StorageSemanticsEnum(str, Enum):
     UNIQUE_POINTER = "uptr"
 
 
-class MemberModel(BaseModel):
-    name: str
+class TypeModel(BaseModel):
     root_type: str
     collection_type: CollectionTypeEnum = CollectionTypeEnum.SINGLE
     storage_semantics: StorageSemanticsEnum = StorageSemanticsEnum.PLAIN
-    ctor: bool = True
-    r_acc: bool = False
-    w_acc: bool = False
-    W_acc: bool = False
-    default_value: Optional[bool | int | str] = None
+
+    _node: NodeModel = PrivateAttr(None)
+    _config: ConfigModel = PrivateAttr(None)
+
+    def set_node(self, node: NodeModel):
+        self._node = node
+        self._config = node._config
+
+    def is_node(self) -> bool:
+        if self.root_type == "Ast":
+            return True
+
+        for node in self._config.nodes:
+            if self.root_type == node.name:
+                return True
+
+        return False
 
     def box_storage_semantics(self, type: str) -> str:
         match self.storage_semantics:
@@ -40,6 +54,9 @@ class MemberModel(BaseModel):
             case StorageSemanticsEnum.POINTER:
                 return f"{type}*"
             case StorageSemanticsEnum.UNIQUE_POINTER:
+                if self.is_node():
+                    return f"{type}::UPtr"
+
                 return f"std::unique_ptr<{type}>"
 
     def box_collection_type(self, type: str) -> str:
@@ -49,6 +66,20 @@ class MemberModel(BaseModel):
             case CollectionTypeEnum.VECTOR:
                 return f"std::vector<{type}>"
 
+    def is_alias(self) -> bool:
+        for alias in self._node.aliases:
+            if self.root_type == alias.name:
+                return True
+
+        return False
+
+    def retrieve_alias(self) -> Self:
+        for alias in self._node.aliases:
+            if self.root_type == alias.name:
+                return alias.type
+
+        return self
+
     @property
     def store_type(self) -> str:
         store_type = self.root_type
@@ -57,32 +88,38 @@ class MemberModel(BaseModel):
         return store_type
 
     def is_primitive_type(self) -> bool:
-        if self.root_type == "bool":
+        type = self.retrieve_alias()
+        if type.collection_type != CollectionTypeEnum.SINGLE:
+            return False
+
+        if type.storage_semantics != StorageSemanticsEnum.PLAIN:
+            return False
+
+        if type.root_type == "bool":
             return True
 
         return False
 
     def is_optional(self) -> bool:
-        if self.collection_type != CollectionTypeEnum.SINGLE:
+        type = self.retrieve_alias()
+        if type.collection_type != CollectionTypeEnum.SINGLE:
             return False
 
-        if self.storage_semantics == StorageSemanticsEnum.POINTER:
+        if type.storage_semantics == StorageSemanticsEnum.POINTER:
             return True
 
         return False
 
     @property
     def r_type(self) -> str:
-        if self.collection_type != CollectionTypeEnum.SINGLE:
+        type = self.retrieve_alias()
+        if type.collection_type != CollectionTypeEnum.SINGLE:
             r_type = self.store_type
             r_type = f"const {r_type}&"
             return r_type
 
         r_type = self.root_type
-        if (
-            self.storage_semantics == StorageSemanticsEnum.PLAIN
-            and self.is_primitive_type()
-        ):
+        if self.is_primitive_type():
             return r_type
 
         if self.is_optional():
@@ -92,7 +129,8 @@ class MemberModel(BaseModel):
 
     @property
     def w_type(self) -> str:
-        if self.collection_type != CollectionTypeEnum.SINGLE:
+        type = self.retrieve_alias()
+        if type.collection_type != CollectionTypeEnum.SINGLE:
             w_type = self.store_type
             w_type = f"{w_type}&"
             return w_type
@@ -105,24 +143,56 @@ class MemberModel(BaseModel):
 
     @property
     def W_type(self) -> str:
-        if self.collection_type != CollectionTypeEnum.SINGLE:
+        type = self.retrieve_alias()
+        if type.collection_type != CollectionTypeEnum.SINGLE:
             W_type = self.store_type
-            if self.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER:
-                W_type = f"{W_type}&&"
+            match type.storage_semantics:
+                case StorageSemanticsEnum.PLAIN:
+                    W_type = f"const {W_type}&"
+                case StorageSemanticsEnum.UNIQUE_POINTER:
+                    W_type = f"{W_type}&&"
             return W_type
 
-        if self.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER:
+        if type.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER:
             W_type = self.store_type
             return f"{W_type}&&"
 
         W_type = self.store_type
-        if (
-            self.storage_semantics == StorageSemanticsEnum.PLAIN
-            and not self.is_primitive_type()
-        ):
+        if not self.is_primitive_type():
             W_type = f"const {W_type}&"
 
         return W_type
+
+
+class AliasModel(BaseModel):
+    name: str
+    type: TypeModel
+
+    _node: NodeModel = PrivateAttr(None)
+    _config: ConfigModel = PrivateAttr(None)
+
+    def set_node(self, node: NodeModel):
+        self._node = node
+        self._config = node._config
+        self.type.set_node(node)
+
+
+class MemberModel(BaseModel):
+    name: str
+    type: TypeModel
+    ctor: bool = True
+    r_acc: bool = False
+    w_acc: bool = False
+    W_acc: bool = False
+    default_value: Optional[bool | int | str] = None
+
+    _node: NodeModel = PrivateAttr(None)
+    _config: ConfigModel = PrivateAttr(None)
+
+    def set_node(self, node: NodeModel):
+        self._node = node
+        self._config = node._config
+        self.type.set_node(node)
 
     @property
     def default(self) -> str:
@@ -146,11 +216,27 @@ class NodeModel(BaseModel):
     aliases: list[AliasModel] = []
     members: list[MemberModel] = []
 
+    _config: ConfigModel = PrivateAttr(None)
+
+    def set_config(self, config: ConfigModel):
+        self._config = config
+        for member in self.members:
+            member.set_node(self)
+
+        for alias in self.aliases:
+            alias.set_node(self)
+
     @model_validator(mode="after")
     def add_uptr_alias(self) -> Self:
         if all(alias.name != "UPtr" for alias in self.aliases):
             self.aliases = [
-                AliasModel(name="UPtr", type=f"std::unique_ptr<{self.name}>"),
+                AliasModel(
+                    name="UPtr",
+                    type=TypeModel(
+                        root_type=self.name,
+                        storage_semantics="uptr",
+                    ),
+                ),
                 *self.aliases,
             ]
         return self
@@ -158,3 +244,9 @@ class NodeModel(BaseModel):
 
 class ConfigModel(BaseModel):
     nodes: list[NodeModel] = []
+
+    @model_validator(mode="after")
+    def set_nodes_config(self) -> Self:
+        for node in self.nodes:
+            node.set_config(self)
+        return self
