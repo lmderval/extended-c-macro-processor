@@ -45,3 +45,7 @@ def generate():
     node_hxx_template = env.get_template("node.hxx.jinja")
     for node in config.nodes:
         print(node_hxx_template.render(node=node))
+
+    node_cc_template = env.get_template("node.cc.jinja")
+    for node in config.nodes:
+        print(node_cc_template.render(node=node))

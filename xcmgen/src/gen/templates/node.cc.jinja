@@ -1,0 +1,18 @@
+#pragma once
+
+#include "{{ node.name | kebab }}.hh"
+
+namespace ast {
+    {{ node.name }}::{{ node.name }}(const parse::Location& loc
+{%- for member in node.members if member.ctor -%}
+    , {{ member.type.W_type }} {{ member.name }}
+{%- endfor -%}
+    )
+        : Ast(loc)
+{% for member in node.members if member.ctor %}
+        , {{ member.name }}_({{ member.name }})
+    {%- if loop.last %}
+ {}
+    {%- endif +%}
+{% endfor %}
+} // namespace ast
