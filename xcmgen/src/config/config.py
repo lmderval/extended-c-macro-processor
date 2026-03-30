@@ -28,6 +28,8 @@ class TypeModel(BaseModel):
     collection_type: CollectionTypeEnum = CollectionTypeEnum.SINGLE
     storage_semantics: StorageSemanticsEnum = StorageSemanticsEnum.PLAIN
 
+    _node_alias: bool = PrivateAttr(False)
+
     _node: NodeModel = PrivateAttr(None)
     _config: ConfigModel = PrivateAttr(None)
 
@@ -54,7 +56,7 @@ class TypeModel(BaseModel):
             case StorageSemanticsEnum.POINTER:
                 return f"{type}*"
             case StorageSemanticsEnum.UNIQUE_POINTER:
-                if self.is_node():
+                if not self._node_alias and self.is_node():
                     return f"{type}::UPtr"
 
                 return f"std::unique_ptr<{type}>"
@@ -241,14 +243,16 @@ class NodeModel(BaseModel):
     @model_validator(mode="after")
     def add_uptr_alias(self) -> Self:
         if all(alias.name != "UPtr" for alias in self.aliases):
-            self.aliases = [
-                AliasModel(
-                    name="UPtr",
-                    type=TypeModel(
-                        root_type=self.name,
-                        storage_semantics="uptr",
-                    ),
+            node_alias = AliasModel(
+                name="UPtr",
+                type=TypeModel(
+                    root_type=self.name,
+                    storage_semantics="uptr",
                 ),
+            )
+            node_alias.type._node_alias = True
+            self.aliases = [
+                node_alias,
                 *self.aliases,
             ]
         return self

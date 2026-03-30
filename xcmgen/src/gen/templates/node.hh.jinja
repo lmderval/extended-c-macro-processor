@@ -19,7 +19,7 @@
 {% endif %}
 
 namespace ast {
-    class {{ node.name }} {
+    class {{ node.name }} : public Ast {
     public:
 {% if node.aliases %}
     {% for alias in node.aliases %}
