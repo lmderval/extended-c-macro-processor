@@ -26,7 +26,13 @@ namespace ast {
     {% endif %}
     {% if member.W_acc %}
     inline void {{ node.name }}::set_{{ member.name }}({{ member.type.W_type() }} {{ member.name }}) {
-        {{ member.name }}_ = {{ member.name }};
+        {{ member.name }}_ =
+        {%- if member.type.requires_move() %}
+ std::move({{ member.name }})
+        {%- else %}
+ {{ member.name }}
+        {%- endif -%}
+        ;
     }
 
     {% endif %}

@@ -145,16 +145,12 @@ class TypeModel(BaseModel):
         type = self.retrieve_alias()
         if type.collection_type != CollectionTypeEnum.SINGLE:
             W_type = self.store_type()
-            match type.storage_semantics:
-                case StorageSemanticsEnum.PLAIN:
-                    W_type = f"const {W_type}&"
-                case StorageSemanticsEnum.UNIQUE_POINTER:
-                    W_type = f"{W_type}&&"
+            if type.storage_semantics == StorageSemanticsEnum.PLAIN:
+                W_type = f"const {W_type}&"
             return W_type
 
         if type.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER:
-            W_type = self.store_type()
-            return f"{W_type}&&"
+            return self.store_type()
 
         W_type = self.store_type()
         if not self.is_primitive_type():
@@ -167,6 +163,10 @@ class TypeModel(BaseModel):
             return False
 
         return self.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER
+
+    def requires_move(self) -> bool:
+        type = self.retrieve_alias()
+        return type.storage_semantics == StorageSemanticsEnum.UNIQUE_POINTER
 
     @property
     def namespace(self) -> str:

@@ -10,7 +10,13 @@ namespace ast {
     )
         : Ast(loc)
 {% for member in node.members if member.ctor %}
-        , {{ member.name }}_({{ member.name }})
+        , {{ member.name }}_(
+    {%- if member.type.requires_move() -%}
+        std::move({{ member.name }})
+    {%- else -%}
+        {{ member.name }}
+    {%- endif -%}
+        )
     {%- if loop.last %}
  {}
     {%- endif +%}
