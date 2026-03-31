@@ -1,11 +1,8 @@
 # generated sources
-src/parse/gen/lexer.cc
-src/parse/gen/location.hh
-src/parse/gen/parser.cc
-src/parse/gen/parser.hh
 src/parse/lexer.cc
 src/parse/parser.cc
 src/parse/parser.hh
+src/parse/location.hh
 
 # binaries
 src/parse/tests/lex

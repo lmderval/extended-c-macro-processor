@@ -1,7 +1,7 @@
 #pragma once
 
 #include "driver.hh"
-#include "gen/parser.hh"
+#include "parser.hh"
 
 #if !defined(yyFlexLexerOnce)
 #    include <FlexLexer.h>

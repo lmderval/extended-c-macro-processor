@@ -1,8 +1,9 @@
-#pragma once
-
-#include "gen/location.hh"
+#ifndef _LOCATION_HH
+#define _LOCATION_HH
 
 namespace parse {
     using Position = position;
     using Location = location;
 } // namespace parse
+
+#endif /* ! _LOCATION_HH */

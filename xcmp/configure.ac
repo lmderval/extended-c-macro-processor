@@ -12,7 +12,8 @@ AC_PROG_CXX
 
 AX_COMPILER_FLAGS([], [], [], [-std=c++23 -Werror -Wall -Wextra -Wold-style-cast])
 
-AC_CHECK_TOOL([CP], [cp], [:])
+AC_CHECK_TOOL([CAT], [cat], [:])
+AC_CHECK_TOOL([SED], [sed], [:])
 AC_CHECK_TOOL([XCMGEN], [xcmgen], [:])
 
 AC_PROG_LEX

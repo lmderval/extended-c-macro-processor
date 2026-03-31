@@ -1,0 +1,10 @@
+LEXER_CC = $(top_srcdir)/src/parse/lexer.cc
+PARSER_CC = $(top_srcdir)/src/parse/parser.cc
+PARSER_HH = $(top_srcdir)/src/parse/parser.hh
+LOCATION_HH = $(top_srcdir)/src/parse/location.hh
+
+GENERATED = \
+	$(LEXER_CC) \
+	$(PARSER_CC) \
+	$(PARSER_HH) \
+	$(LOCATION_HH)
