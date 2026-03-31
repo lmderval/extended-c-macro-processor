@@ -1,0 +1,16 @@
+GENERATED = \
+	$(top_srcdir)/src/ast/text.hh \
+	$(top_srcdir)/src/ast/text.hxx \
+	$(top_srcdir)/src/ast/text.cc \
+	$(top_srcdir)/src/ast/identifier.hh \
+	$(top_srcdir)/src/ast/identifier.hxx \
+	$(top_srcdir)/src/ast/identifier.cc \
+	$(top_srcdir)/src/ast/document.hh \
+	$(top_srcdir)/src/ast/document.hxx \
+	$(top_srcdir)/src/ast/document.cc \
+	$(top_srcdir)/src/ast/macro-def.hh \
+	$(top_srcdir)/src/ast/macro-def.hxx \
+	$(top_srcdir)/src/ast/macro-def.cc \
+	$(top_srcdir)/src/ast/macro-call.hh \
+	$(top_srcdir)/src/ast/macro-call.hxx \
+	$(top_srcdir)/src/ast/macro-call.cc

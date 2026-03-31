@@ -13,7 +13,7 @@ namespace ast {
     void PrettyPrinter::operator()(const Identifier& e) { ps_ << e.get_id(); }
 
     void PrettyPrinter::operator()(const MacroCall& e) {
-        ps_ << e.get_identifier() << "(";
+        ps_ << e.get_id() << "(";
         for (auto it = e.get_args().cbegin(); it != e.get_args().cend(); it++) {
             if (it != e.get_args().cbegin()) ps_ << ",";
             (*it)->accept(*this);

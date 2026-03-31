@@ -32,13 +32,10 @@ libparse_la_LIBADD = \
 	$(top_srcdir)/src/ast/libast.la
 
 lexer.cc: gen/lexer.cc
-	@echo '  COPY     $@'
-	@$(CP) $< $@
+	$(AM_V_GEN)$(CP) $< $@
 
 parser.hh: gen/parser.hh
-	@echo '  COPY     $@'
-	@$(CP) $< $@
+	$(AM_V_GEN)$(CP) $< $@
 
 parser.cc: gen/parser.cc
-	@echo '  COPY     $@'
-	@$(CP) $< $@
+	$(AM_V_GEN)$(CP) $< $@

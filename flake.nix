@@ -41,8 +41,11 @@
           py-nix = pyproject-nix;
           py-build = pyproject-build-systems;
         };
-        xcmp = import ./xcmp { inherit pkgs; };
         xcmgen = import ./xcmgen { inherit pkgs pytools; };
+        xcmp = import ./xcmp {
+          inherit pkgs;
+          xcmgen = xcmgen.package;
+        };
       in
       {
         packages = {

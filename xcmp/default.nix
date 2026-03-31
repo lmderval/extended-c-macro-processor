@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, xcmgen }:
 let
   pname = "xcmp";
   version = "0.0.0";
@@ -15,6 +15,8 @@ let
       pkg-config
       flex
       bison
+    ] ++ [
+      xcmgen
     ];
 
     postPatch = ''

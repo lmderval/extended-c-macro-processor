@@ -13,6 +13,7 @@ AC_PROG_CXX
 AX_COMPILER_FLAGS([], [], [], [-std=c++23 -Werror -Wall -Wextra -Wold-style-cast])
 
 AC_CHECK_TOOL([CP], [cp], [:])
+AC_CHECK_TOOL([XCMGEN], [xcmgen], [:])
 
 AC_PROG_LEX
 
@@ -22,6 +23,7 @@ AC_CONFIG_FILES([
     Makefile
     src/Makefile
     src/ast/Makefile
+    src/ast/gen/Makefile
     src/parse/Makefile
     src/parse/gen/Makefile
     src/parse/tests/Makefile

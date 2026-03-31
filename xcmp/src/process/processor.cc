@@ -104,8 +104,7 @@ namespace process {
                 body.push_back(std::make_unique<ast::Text>(loc, "\n"));
                 auto par_def = std::make_unique<ast::MacroDef>(
                     loc, name, ast::MacroDef::MacroPars(),
-                    std::make_unique<ast::Document>(loc, std::move(body)),
-                    true);
+                    std::make_unique<ast::Document>(loc, std::move(body)));
                 pars.push_back(std::move(par_def));
                 macros_.emplace(name, pars.back().get());
             }
@@ -182,10 +181,10 @@ namespace process {
         std::vector<ast::Ast::UPtr> body;
 
         parse::Location loc(e.get_loc().begin);
-        loc.columns(e.get_identifier().size());
+        loc.columns(e.get_id().size());
 
         if (need_padding_) {
-            body.push_back(make_padding(e, e.get_identifier().size()));
+            body.push_back(make_padding(e, e.get_id().size()));
             need_padding_ = false;
             loc = body.back()->get_loc();
         }
@@ -262,8 +261,8 @@ namespace process {
     }
 
     void Processor::operator()(const ast::MacroCall& e) {
-        if (macros_.contains(e.get_identifier())) {
-            const ast::MacroDef& def = *macros_.at(e.get_identifier());
+        if (macros_.contains(e.get_id())) {
+            const ast::MacroDef& def = *macros_.at(e.get_id());
             result_ = def.get_pars().empty() ? expand_as_identifier(def, e)
                                              : expand(def, e);
             return;
@@ -277,7 +276,7 @@ namespace process {
         }
 
         parse::Location loc(e.get_loc().begin);
-        body.push_back(make_after(loc, e.get_identifier()));
+        body.push_back(make_after(loc, e.get_id()));
 
         auto args = output_args(e);
         if (!args.has_value()) {

@@ -1,5 +1,6 @@
 SUBDIRS = \
 	misc \
+	ast/gen \
 	parse/gen \
 	ast \
 	parse \

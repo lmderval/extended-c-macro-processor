@@ -1,0 +1,96 @@
+[[nodes]]
+name = "Document"
+
+  [[nodes.members]]
+  name = "body"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "Ast"
+    collection_type = "vec"
+    storage_semantics = "uptr"
+
+[[nodes]]
+name = "Identifier"
+
+  [[nodes.members]]
+  name = "id"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "std::string"
+
+[[nodes]]
+name = "MacroCall"
+
+  [[nodes.aliases]]
+  name = "MacroArgs"
+
+    [nodes.aliases.type]
+    root_type = "Document"
+    collection_type = "vec"
+    storage_semantics = "uptr"
+
+  [[nodes.members]]
+  name = "id"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "std::string"
+
+  [[nodes.members]]
+  name = "args"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "MacroArgs"
+
+  [[nodes.members]]
+  name = "spaced"
+  r_acc = true
+  default_value = false
+
+    [nodes.members.type]
+    root_type = "bool"
+
+[[nodes]]
+name = "MacroDef"
+
+  [[nodes.aliases]]
+  name = "MacroPars"
+
+    [nodes.aliases.type]
+    root_type = "std::string"
+    collection_type = "vec"
+
+  [[nodes.members]]
+  name = "name"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "std::string"
+
+  [[nodes.members]]
+  name = "pars"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "MacroPars"
+
+  [[nodes.members]]
+  name = "body"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "Ast"
+    storage_semantics = "uptr"
+
+[[nodes]]
+name = "Text"
+
+  [[nodes.members]]
+  name = "text"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "std::string"
