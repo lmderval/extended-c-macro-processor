@@ -2,6 +2,8 @@ from enum import Enum
 from pydantic import BaseModel, PrivateAttr, model_validator
 from typing import Optional, Self
 
+from utils import name_utils
+
 
 class NodeModel:
     pass
@@ -239,6 +241,35 @@ class NodeModel(BaseModel):
 
         for alias in self.aliases:
             alias.set_node(self)
+
+        self.add_node_includes()
+
+    @model_validator(mode="after")
+    def add_missing_includes(self) -> Self:
+        alias_types = [alias.type for alias in self.aliases]
+        member_types = [member.type for member in self.members]
+        types = alias_types + member_types
+        if "ast" not in self.local_includes:
+            self.local_includes.append("ast")
+        if "vector" not in self.sys_includes and any(
+            type.collection_type == CollectionTypeEnum.VECTOR for type in types
+        ):
+            self.sys_includes.append("vector")
+        if "string" not in self.sys_includes and any(
+            type.root_type == "std::string" for type in types
+        ):
+            self.sys_includes.append("string")
+        return self
+
+    def add_node_includes(self):
+        alias_types = [alias.type for alias in self.aliases]
+        member_types = [member.type for member in self.members]
+        types = alias_types + member_types
+        for type in types:
+            if type.is_node() and type.root_type != self.name:
+                include = name_utils.kebab(type.root_type)
+                if include not in self.local_includes:
+                    self.local_includes.append(include)
 
     @model_validator(mode="after")
     def add_uptr_alias(self) -> Self:
