@@ -5,7 +5,7 @@ import sys
 import toml
 from typing import Optional
 
-from config.config import ConfigModel, NodeModel
+from config import ConfigModel, NodeModel
 
 from utils import name_utils
 

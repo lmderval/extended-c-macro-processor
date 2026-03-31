@@ -1,7 +1,7 @@
 [project]
 name = "xcmgen"
-version = "0.0.0"
-description = "Add your description here"
+version = "0.1.0"
+description = "AST nodes generator for xcmp"
 authors = [
     { name = "Louis-Mael Derval", email = "louismaelderval@gmail.com" }
 ]
@@ -16,9 +16,12 @@ dependencies = [
 xcmgen = "gen:generate"
 
 [build-system]
-requires = ["uv_build>=0.9.0,<0.10.0"]
-build-backend = "uv_build"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.uv.build-backend]
-module-name = "gen"
-module-root = "src"
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/config",
+    "src/gen",
+    "src/utils",
+]
