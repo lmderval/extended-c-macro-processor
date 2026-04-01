@@ -10,7 +10,14 @@ LT_INIT
 
 AC_PROG_CXX
 
-AX_COMPILER_FLAGS([], [], [], [-std=c++23 -Werror -Wall -Wextra -Wold-style-cast])
+AX_COMPILER_FLAGS([], [], [], [ \
+    -std=c++23 \
+    -Werror \
+    -Wall \
+    -Wextra \
+    -Wold-style-cast \
+    -Wno-uninitialized \
+])
 
 AC_CHECK_TOOL([CAT], [cat], [:])
 AC_CHECK_TOOL([SED], [sed], [:])
