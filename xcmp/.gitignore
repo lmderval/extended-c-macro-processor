@@ -1,4 +1,19 @@
 # generated sources
+src/ast/document.cc
+src/ast/document.hh
+src/ast/document.hxx
+src/ast/identifier.cc
+src/ast/identifier.hh
+src/ast/identifier.hxx
+src/ast/macro-call.cc
+src/ast/macro-call.hh
+src/ast/macro-call.hxx
+src/ast/macro-def.cc
+src/ast/macro-def.hh
+src/ast/macro-def.hxx
+src/ast/text.cc
+src/ast/text.hh
+src/ast/text.hxx
 src/parse/lexer.cc
 src/parse/parser.cc
 src/parse/parser.hh
