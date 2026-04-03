@@ -15,6 +15,7 @@ namespace ast {
         void operator()(const MacroCall& e) override;
         void operator()(const MacroDef& e) override;
         void operator()(const Text& e) override;
+        void operator()(const String& e) override;
 
     private:
         struct pstream {

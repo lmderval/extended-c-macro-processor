@@ -39,6 +39,11 @@ namespace ast {
 
     void PrettyPrinter::operator()(const Text& e) { ps_ << e.get_text(); }
 
+    void PrettyPrinter::operator()(const String& e) {
+        ps_ << "$";
+        e.get_node().accept(*this);
+    }
+
     PrettyPrinter::pstream&
     PrettyPrinter::pstream::operator<<(std::ostream& (*fx)(std::ostream&)) {
         fx(os);

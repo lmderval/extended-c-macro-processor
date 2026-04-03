@@ -7,4 +7,5 @@ namespace ast {
     class MacroCall;
     class MacroDef;
     class Text;
+    class String;
 } // namespace ast

@@ -36,6 +36,7 @@ namespace process {
         void operator()(const ast::MacroCall& e) override;
         void operator()(const ast::MacroDef& e) override;
         void operator()(const ast::Text& e) override;
+        void operator()(const ast::String& e) override;
 
     private:
         misc::scoped_map<std::string, const ast::MacroDef*> macros_;

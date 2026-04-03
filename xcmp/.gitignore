@@ -14,6 +14,9 @@ src/ast/macro-def.hxx
 src/ast/text.cc
 src/ast/text.hh
 src/ast/text.hxx
+src/ast/string.cc
+src/ast/string.hh
+src/ast/string.hxx
 src/parse/lexer.cc
 src/parse/parser.cc
 src/parse/parser.hh

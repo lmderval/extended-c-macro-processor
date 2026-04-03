@@ -311,4 +311,8 @@ namespace process {
 
         result_ = std::move(text);
     }
+
+    void Processor::operator()([[maybe_unused]] const ast::String& e) {
+        result_ = std::unexpected<std::string>("not implemented yet");
+    }
 } // namespace process

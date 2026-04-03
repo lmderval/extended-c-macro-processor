@@ -94,3 +94,14 @@ name = "Text"
 
     [nodes.members.type]
     root_type = "std::string"
+
+[[nodes]]
+name = "String"
+
+  [[nodes.members]]
+  name = "node"
+  r_acc = true
+
+    [nodes.members.type]
+    root_type = "Ast"
+    storage_semantics = "uptr"

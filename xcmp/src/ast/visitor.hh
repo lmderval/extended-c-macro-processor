@@ -26,6 +26,7 @@ namespace ast {
         virtual void operator()(const_t<MacroCall>& e) = 0;
         virtual void operator()(const_t<MacroDef>& e) = 0;
         virtual void operator()(const_t<Text>& e) = 0;
+        virtual void operator()(const_t<String>& e) = 0;
     };
 
     using ConstVisitor = GenVisitor<const_trait>;

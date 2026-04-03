@@ -13,4 +13,7 @@ GENERATED = \
 	$(top_srcdir)/src/ast/macro-def.cc \
 	$(top_srcdir)/src/ast/macro-call.hh \
 	$(top_srcdir)/src/ast/macro-call.hxx \
-	$(top_srcdir)/src/ast/macro-call.cc
+	$(top_srcdir)/src/ast/macro-call.cc \
+	$(top_srcdir)/src/ast/string.hh \
+	$(top_srcdir)/src/ast/string.hxx \
+	$(top_srcdir)/src/ast/string.cc
